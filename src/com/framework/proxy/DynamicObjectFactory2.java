@@ -1,0 +1,144 @@
+package com.framework.proxy;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import com.framework.common.BaseUtils;
+import com.framework.log.Logger;
+import com.framework.proxy.impl.DefaultBean;
+import com.framework.proxy.interfaces.Bean;
+
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.MethodInterceptor;
+
+public class DynamicObjectFactory2 {
+
+	private static Map<ProxyInfo, Class<?>> classCache = new HashMap<ProxyInfo, Class<?>>();
+
+	@SuppressWarnings("unchecked")
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor,
+			Class<? extends DynamicInterface>[] interfaces, DynamicInterface[] impls) {
+		T dynamicObject = null;
+		if (target != null) {
+			if (interfaces.length == impls.length) {
+				ProxyInfo proxyInfo = new ProxyInfo(target.getClass(), interfaces);
+				Class<?> dynamicClass = classCache.get(proxyInfo);
+				if (dynamicClass == null) {
+					Enhancer enhancer = new Enhancer();
+					enhancer.setSuperclass(target.getClass());
+					List<Class<? extends Callback>> callbacks = new ArrayList<Class<? extends Callback>>();
+					callbacks.add(MethodInterceptor.class);
+					callbacks.addAll(Arrays.asList(interfaces));
+					enhancer.setCallbackTypes(callbacks.toArray(new Class[0]));
+					enhancer.setInterfaces(interfaces);
+					enhancer.setCallbackFilter(new DynamicCallbackFilter());
+					dynamicClass = enhancer.createClass();
+					classCache.put(proxyInfo, dynamicClass);
+				}
+
+				if (dynamicClass != null) {
+					dynamicObject = (T) BaseUtils.newInstance(dynamicClass);
+					List<Object> sortedImpls = new ArrayList<Object>();
+					sortedImpls.add(methodInterceptor);
+					for (Class<?> i : interfaces) {
+						for (DynamicInterface di : impls) {
+							if (i.isInstance(di)) {
+								sortedImpls.add(di);
+								break;
+							}
+						}
+					}
+
+					((Factory) dynamicObject).setCallbacks(sortedImpls.toArray(new Callback[0]));
+				}
+			} else {
+				Logger.warn("The length of interfaces doesn't match the length of implements");
+			}
+		}
+		return dynamicObject;
+	}
+
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor,
+			Class<? extends DynamicInterface>[] interfaces, Class<? extends DynamicInterface>[] implClasses) {
+		DynamicInterface[] impls = new DynamicInterface[implClasses.length];
+		for (int i = 0; i < impls.length; i++) {
+			impls[i] = (DynamicInterface) BaseUtils.newInstance(implClasses[i]);
+			impls[i].setSource(target);
+		}
+
+		return createDynamicObject(target, methodInterceptor, interfaces, impls);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T createDynamicBeanObject(T target) throws Exception {
+		Class<? extends DynamicInterface>[] interfaces = new Class[] { Bean.class };
+		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces,
+				new DynamicInterface[] { new DefaultBean(target) });
+	}
+
+	static class ProxyInfo {
+
+		private Class<?> superClass;
+
+		private Class<?>[] interfaces;
+
+		public ProxyInfo(Class<?> superClass, Class<?>[] interfaces) {
+			super();
+			this.superClass = superClass;
+			setInterfaces(interfaces);
+		}
+
+		public Class<?> getSuperClass() {
+			return superClass;
+		}
+
+		public void setSuperClass(Class<?> superClass) {
+			this.superClass = superClass;
+		}
+
+		public Class<?>[] getInterfaces() {
+			return interfaces;
+		}
+
+		public void setInterfaces(Class<?>[] interfaces) {
+			Map<String, Class<?>> sortedInterfaces = new TreeMap<String, Class<?>>();
+			for (Class<?> i : interfaces) {
+				sortedInterfaces.put(i.getName(), i);
+			}
+			this.interfaces = sortedInterfaces.values().toArray(new Class<?>[] {});
+		}
+
+		public boolean equals(Object obj) {
+			ProxyInfo info = (ProxyInfo) obj;
+			boolean isEqual = superClass == info.superClass;
+			if (isEqual) {
+				isEqual = isEqual && interfaces.length == info.interfaces.length;
+				if (isEqual) {
+					for (int i = 0; i < interfaces.length; i++) {
+						isEqual = isEqual && interfaces[i] == info.interfaces[i];
+						if (!isEqual) {
+							break;
+						}
+					}
+				}
+			}
+			return isEqual;
+		}
+
+		public int hashCode() {
+			int hashCode = superClass.hashCode();
+			for (Class<?> i : interfaces) {
+				hashCode += i.hashCode();
+			}
+			return hashCode;
+		}
+
+	}
+
+}
