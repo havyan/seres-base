@@ -55,11 +55,11 @@ public class DynamicObjectFactory {
 						if (methodInterceptor == null) {
 							methodInterceptor = new DynamicMethodInterceptor(target, interfaces);
 						}
-						BaseUtils.setFieldValue(dynamicObject,
+						BaseUtils.setField(dynamicObject,
 								DynamicClassCache.getFieldName(dynamicClass.getName(), MethodInterceptor.class),
 								methodInterceptor);
 						for (int i = 0; i < interfaces.length; i++) {
-							BaseUtils.setFieldValue(dynamicObject,
+							BaseUtils.setField(dynamicObject,
 									DynamicClassCache.getFieldName(dynamicClass.getName(), interfaces[i]), impls[i]);
 						}
 					}

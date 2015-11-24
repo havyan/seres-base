@@ -73,25 +73,32 @@ public class BaseUtils {
 		return cloneObject;
 	}
 
-	public static void setFieldValue(Object target, String fieldName, Object value) {
+	public static void setField(Object target, String fieldName, Object value) {
 		Field field = null;
 		try {
 			field = target.getClass().getDeclaredField(fieldName);
-		} catch (SecurityException e) {
-			Logger.error(e);
-		} catch (NoSuchFieldException e) {
+		} catch (Exception e) {
 			Logger.error(e);
 		}
 		if (field != null) {
 			field.setAccessible(true);
 			try {
 				field.set(target, value);
-			} catch (IllegalArgumentException e) {
-				Logger.error(e);
-			} catch (IllegalAccessException e) {
+			} catch (Exception e) {
 				Logger.error(e);
 			}
 		}
+	}
+
+	public static boolean hasField(Object target, String fieldName) {
+		Field field = null;
+		try {
+			field = target.getClass().getDeclaredField(fieldName);
+		} catch (Exception e) {
+			Logger.info(e);
+			return false;
+		}
+		return field != null;
 	}
 
 	public static Object newInstance(String className) {
