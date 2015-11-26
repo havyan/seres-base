@@ -16,7 +16,6 @@ import com.framework.common.BaseUtils;
 import com.framework.log.Logger;
 import com.framework.proxy.DynamicObjectFactory;
 import com.framework.proxy.interfaces.Bean;
-import com.framework.proxy.interfaces.PropertiesContainer;
 
 /**
  * @author HWYan
@@ -80,16 +79,15 @@ public class DefaultBean implements Bean {
 				if (complexProperties.containsKey(propertyName)) {
 					return complexProperties.get(propertyName);
 				} else {
-					Method getMethod = BaseUtils.getReadMethod(source, propertyName);
-					if (!getMethod.getReturnType().isPrimitive()
-							&& !Modifier.isFinal(getMethod.getReturnType().getModifiers())) {
+					Method getter = BaseUtils.getReadMethod(source, propertyName);
+					if (!getter.getReturnType().isPrimitive() && !Modifier.isFinal(getter.getReturnType().getModifiers())) {
 						Object value = BaseUtils.getProperty(source, propertyName);
 						if (value != null) {
 							if (List.class.isInstance(value)) {
 								List dynamicList = (List<?>) BaseUtils.newInstance(value.getClass());
 								for (Object obj : (List<?>) value) {
 									if (!(obj instanceof Bean)) {
-										obj = DynamicObjectFactory.createDynamicBeanObject(obj);
+										obj = DynamicObjectFactory.createDynamicBeanObject((Bean) obj);
 										((Bean) obj).addPropertyChangeListener(this);
 									}
 									((Bean) obj).setStatus(Bean.UNCHANGED);
@@ -98,7 +96,7 @@ public class DefaultBean implements Bean {
 								value = dynamicList;
 							} else {
 								value = DynamicObjectFactory.createDynamicBeanObject(value);
-								((PropertiesContainer) value).addPropertyChangeListener(this);
+								((Bean) value).addPropertyChangeListener(this);
 							}
 							complexProperties.put(propertyName, value);
 						}

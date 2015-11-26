@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ClassUtils;
 
 import com.framework.log.Logger;
@@ -41,8 +41,8 @@ public class BaseUtils {
 
 	private static final Map<String, Class<?>> primitiveWrapperMap = new HashMap<String, Class<?>>();
 
-	private static final Class<?>[] primitiveTypes = new Class<?>[] { Boolean.TYPE, Byte.TYPE, Character.TYPE,
-			Short.TYPE, Integer.TYPE, Long.TYPE, Double.TYPE, Float.TYPE, Void.TYPE };
+	private static final Class<?>[] primitiveTypes = new Class<?>[] { Boolean.TYPE, Byte.TYPE, Character.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE, Double.TYPE, Float.TYPE,
+			Void.TYPE };
 
 	static {
 		for (Class<?> type : primitiveTypes) {
@@ -117,7 +117,7 @@ public class BaseUtils {
 
 	public static Object getProperty(Object bean, String propertyName) {
 		try {
-			return BeanUtils.getProperty(bean, propertyName);
+			return PropertyUtils.getProperty(bean, propertyName);
 		} catch (Exception e) {
 			Logger.error(e);
 			return null;
@@ -126,7 +126,7 @@ public class BaseUtils {
 
 	public static void setProperty(Object bean, String propertyName, Object value) {
 		try {
-			BeanUtils.setProperty(bean, propertyName, value);
+			PropertyUtils.setProperty(bean, propertyName, value);
 		} catch (Exception e) {
 			Logger.error(e);
 		}
@@ -219,7 +219,7 @@ public class BaseUtils {
 	public static void setProperties(Object bean, Map<String, Object> properties) {
 		for (Map.Entry<String, Object> entry : properties.entrySet()) {
 			try {
-				BeanUtils.setProperty(bean, entry.getKey(), entry.getValue());
+				PropertyUtils.setProperty(bean, entry.getKey(), entry.getValue());
 			} catch (Exception e) {
 				Logger.error(e);
 			}
@@ -322,8 +322,7 @@ public class BaseUtils {
 	 * @param recursive
 	 * @param classes
 	 */
-	public static void findAndAddClassesInPackageByFile(String packageName, String packagePath, final boolean recursive,
-			Set<Class<?>> classes) {
+	public static void findAndAddClassesInPackageByFile(String packageName, String packagePath, final boolean recursive, Set<Class<?>> classes) {
 		File dir = new File(packagePath);
 		if (!dir.exists() || !dir.isDirectory()) {
 			return;
@@ -335,13 +334,11 @@ public class BaseUtils {
 		});
 		for (File file : dirfiles) {
 			if (file.isDirectory()) {
-				findAndAddClassesInPackageByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive,
-						classes);
+				findAndAddClassesInPackageByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive, classes);
 			} else {
 				String className = file.getName().substring(0, file.getName().length() - 6);
 				try {
-					classes.add(
-							Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className));
+					classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className));
 				} catch (ClassNotFoundException e) {
 					Logger.error(e);
 				}

@@ -11,7 +11,7 @@ import com.framework.proxy.DynamicInterface;
  * @author HWYan
  * 
  */
-public interface Bean extends DynamicInterface,PropertyChangeListener, PropertiesContainer{
+public interface Bean extends DynamicInterface, PropertyChangeListener {
 
 	public int getStatus();
 
@@ -21,8 +21,18 @@ public interface Bean extends DynamicInterface,PropertyChangeListener, Propertie
 
 	public Object getProperty(String propertyName);
 
+	public void addPropertyChangeListener(PropertyChangeListener l);
+
+	public void removePropertyChangeListener(PropertyChangeListener l);
+
+	public void firePropertyChange(String propertyName, Object oldValue, Object newValue);
+
+	public boolean flushPropertyChange();
+
+	public void cancelPropertyChange();
+
 	public static final int NEW = 0;
-	
+
 	public static final int UNCHANGED = 1;
 
 	public static final int UPDATED = 2;
