@@ -93,14 +93,21 @@ public class BaseUtils {
 	}
 
 	public static boolean hasField(Object target, String fieldName) {
-		Field field = null;
 		try {
-			field = target.getClass().getDeclaredField(fieldName);
+			return target.getClass().getDeclaredField(fieldName) != null;
 		} catch (Exception e) {
 			Logger.info(e);
 			return false;
 		}
-		return field != null;
+	}
+
+	public static boolean hasMethod(Object target, String name, Class<?>... parameterTypes) {
+		try {
+			return target.getClass().getDeclaredMethod(name, parameterTypes) != null;
+		} catch (Exception e) {
+			Logger.info(e);
+			return false;
+		}
 	}
 
 	public static Object newInstance(String className) {

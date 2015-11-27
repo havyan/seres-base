@@ -121,6 +121,11 @@ public class DefaultBean implements Bean {
 		changeSupport.addPropertyChangeListener(l);
 	}
 
+	@Override
+	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+		changeSupport.addPropertyChangeListener(propertyName, listener);
+	}
+
 	public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
 		changeSupport.removePropertyChangeListener(l);
 	}

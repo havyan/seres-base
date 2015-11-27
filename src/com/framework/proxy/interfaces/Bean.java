@@ -25,6 +25,8 @@ public interface Bean extends DynamicInterface, PropertyChangeListener {
 
 	public void removePropertyChangeListener(PropertyChangeListener l);
 
+	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
+
 	public void firePropertyChange(String propertyName, Object oldValue, Object newValue);
 
 	public boolean flushPropertyChange();

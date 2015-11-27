@@ -95,7 +95,7 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 		return proxy.invoke(source, args);
 	}
 
-	protected boolean containsInterface(Class<?> cls) {
+	protected boolean hasInterface(Class<?> cls) {
 		for (Class<? extends DynamicInterface> i : interfaces) {
 			if (i == cls) {
 				return true;

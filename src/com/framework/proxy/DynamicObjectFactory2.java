@@ -1,5 +1,6 @@
 package com.framework.proxy;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +11,9 @@ import java.util.TreeMap;
 import com.framework.common.BaseUtils;
 import com.framework.log.Logger;
 import com.framework.proxy.impl.DefaultBean;
+import com.framework.proxy.impl.DynamicCollectionImpl;
 import com.framework.proxy.interfaces.Bean;
+import com.framework.proxy.interfaces.DynamicCollection;
 
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
@@ -22,11 +25,16 @@ public class DynamicObjectFactory2 {
 	private static Map<ProxyInfo, Class<?>> classCache = new HashMap<ProxyInfo, Class<?>>();
 
 	@SuppressWarnings("unchecked")
-	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor,
-			Class<? extends DynamicInterface>[] interfaces, DynamicInterface[] impls) {
-		T dynamicObject = null;
-		if (target != null) {
-			if (interfaces.length == impls.length) {
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicInterface>[] interfaces, DynamicInterface[] impls) {
+		if (target != null && !target.getClass().isPrimitive() && !Modifier.isFinal(target.getClass().getModifiers())) {
+			T dynamicObject = null;
+			if (interfaces == null) {
+				interfaces = (Class<? extends DynamicInterface>[]) new Class<?>[0];
+			}
+			if (impls == null) {
+				impls = new DynamicInterface[0];
+			}
+			if ((interfaces.length == impls.length)) {
 				ProxyInfo proxyInfo = new ProxyInfo(target.getClass(), interfaces);
 				Class<?> dynamicClass = classCache.get(proxyInfo);
 				if (dynamicClass == null) {
@@ -60,12 +68,15 @@ public class DynamicObjectFactory2 {
 			} else {
 				Logger.warn("The length of interfaces doesn't match the length of implements");
 			}
+			return dynamicObject;
+		} else {
+			return target;
 		}
-		return dynamicObject;
+
 	}
 
-	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor,
-			Class<? extends DynamicInterface>[] interfaces, Class<? extends DynamicInterface>[] implClasses) {
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicInterface>[] interfaces,
+			Class<? extends DynamicInterface>[] implClasses) {
 		DynamicInterface[] impls = new DynamicInterface[implClasses.length];
 		for (int i = 0; i < impls.length; i++) {
 			impls[i] = (DynamicInterface) BaseUtils.newInstance(implClasses[i]);
@@ -78,8 +89,13 @@ public class DynamicObjectFactory2 {
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicBeanObject(T target) throws Exception {
 		Class<? extends DynamicInterface>[] interfaces = new Class[] { Bean.class };
-		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces,
-				new DynamicInterface[] { new DefaultBean(target) });
+		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicInterface[] { new DefaultBean(target) });
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends List<?>> T createDynamicListObject(T target) throws Exception {
+		Class<? extends DynamicInterface>[] interfaces = new Class[] { DynamicCollection.class };
+		return createDynamicObject(target, new ListMethodInterceptor(target, interfaces), interfaces, new DynamicInterface[] { new DynamicCollectionImpl(target) });
 	}
 
 	static class ProxyInfo {

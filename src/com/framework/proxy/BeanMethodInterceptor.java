@@ -21,7 +21,7 @@ public class BeanMethodInterceptor extends DynamicMethodInterceptor {
 	}
 
 	protected Object invokeSourceMethod(Object dynamicObject, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-		if (containsInterface(Bean.class)) {
+		if (hasInterface(Bean.class)) {
 			if (method.getName().startsWith("set") || method.getName().startsWith("get")) {
 				Bean bean = getInterfaceFieldValue(dynamicObject, Bean.class);
 				String propertyName = Introspector.decapitalize(method.getName().substring(3));
@@ -29,7 +29,9 @@ public class BeanMethodInterceptor extends DynamicMethodInterceptor {
 					bean.setProperty(propertyName, args[0]);
 					return null;
 				} else {
-					return bean.getProperty(propertyName);
+					if (args == null || args.length == 0) {
+						return bean.getProperty(propertyName);
+					}
 				}
 			}
 		}

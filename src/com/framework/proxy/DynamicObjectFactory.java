@@ -3,6 +3,7 @@
  */
 package com.framework.proxy;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +26,9 @@ public class DynamicObjectFactory {
 	private static final String CALLBACK_PREFIX = "CGLIB$CALLBACK_";
 
 	@SuppressWarnings("unchecked")
-	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor,
-			Class<? extends DynamicInterface>[] interfaces, DynamicInterface[] impls) {
-		T dynamicObject = null;
-		if (target != null) {
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicInterface>[] interfaces, DynamicInterface[] impls) {
+		if (target != null && !target.getClass().isPrimitive() && !Modifier.isFinal(target.getClass().getModifiers())) {
+			T dynamicObject = null;
 			if (interfaces.length == impls.length) {
 				String classKey = createClassKey(target, interfaces);
 				Class<?> dynamicClass = DynamicClassCache.classCache.get(classKey);
@@ -55,24 +55,23 @@ public class DynamicObjectFactory {
 						if (methodInterceptor == null) {
 							methodInterceptor = new DynamicMethodInterceptor(target, interfaces);
 						}
-						BaseUtils.setField(dynamicObject,
-								DynamicClassCache.getFieldName(dynamicClass.getName(), MethodInterceptor.class),
-								methodInterceptor);
+						BaseUtils.setField(dynamicObject, DynamicClassCache.getFieldName(dynamicClass.getName(), MethodInterceptor.class), methodInterceptor);
 						for (int i = 0; i < interfaces.length; i++) {
-							BaseUtils.setField(dynamicObject,
-									DynamicClassCache.getFieldName(dynamicClass.getName(), interfaces[i]), impls[i]);
+							BaseUtils.setField(dynamicObject, DynamicClassCache.getFieldName(dynamicClass.getName(), interfaces[i]), impls[i]);
 						}
 					}
 				}
 			} else {
 				Logger.warn("The length of interfaces doesn't match the length of implements");
 			}
+			return dynamicObject;
+		} else {
+			return target;
 		}
-		return dynamicObject;
 	}
 
-	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor,
-			Class<? extends DynamicInterface>[] interfaces, Class<? extends DynamicInterface>[] implClasses) {
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicInterface>[] interfaces,
+			Class<? extends DynamicInterface>[] implClasses) {
 		DynamicInterface[] impls = new DynamicInterface[implClasses.length];
 		for (int i = 0; i < impls.length; i++) {
 			impls[i] = (DynamicInterface) BaseUtils.newInstance(implClasses[i]);
@@ -85,8 +84,7 @@ public class DynamicObjectFactory {
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicBeanObject(T target) {
 		Class<? extends DynamicInterface>[] interfaces = new Class[] { Bean.class };
-		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces,
-				new DynamicInterface[] { new DefaultBean(target) });
+		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicInterface[] { new DefaultBean(target) });
 	}
 
 	private static String createClassKey(Object target, Class<? extends Callback>[] interfaces) {
