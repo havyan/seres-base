@@ -1,14 +1,16 @@
 package com.framework.mock;
 
-public class Person {
+import java.util.List;
 
-	public static Person create() {
-		return null;
-	}
+public class Person {
 
 	private String name;
 
 	private int age;
+	
+	private Profile profile;
+	
+	private List<Profile> profiles;
 
 	public Person() {
 		super();
@@ -34,5 +36,21 @@ public class Person {
 
 	public void setAge(int age) {
 		this.age = age;
+	}
+
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(Profile profile) {
+		this.profile = profile;
+	}
+
+	public List<Profile> getProfiles() {
+		return profiles;
+	}
+
+	public void setProfiles(List<Profile> profiles) {
+		this.profiles = profiles;
 	}
 }

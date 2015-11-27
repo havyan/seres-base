@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.framework.mock.Person;
+import com.framework.mock.Profile;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
 
@@ -11,15 +12,36 @@ import junit.framework.TestCase;
 
 public class DynamicObjectFactoryTest extends TestCase {
 
-	private Person person = new Person();
-
 	public void setUp() {
 
 	}
 
 	public void testCreateDynamicBeanObject() throws Exception {
+		Person person = new Person("Haowei", 31);
+		List<Profile> profiles = new ArrayList<Profile>();
+		Profile profile1 = new Profile("a", 170, 140);
+		Profile profile2 = new Profile("b", 170, 140);
+		Profile profile3 = new Profile("c", 170, 140);
+		Profile profile4 = new Profile("d", 170, 140);
+		profiles.add(profile1);
+		profiles.add(profile2);
+		profiles.add(profile3);
+		profiles.add(profile4);
+		person.setProfiles(profiles);
+		person.setProfile(new Profile("e", 170, 140));
 		Person bean = DynamicObjectFactory2.createDynamicBeanObject(person);
 		assertTrue(bean instanceof Bean);
+		assertTrue(bean.getProfile() instanceof Bean);
+		assertTrue(bean.getProfiles() instanceof DynamicCollection);
+		assertTrue(bean.getProfiles().get(0) instanceof Bean);
+		bean.getProfiles().remove(profile3);
+		assertTrue(bean.getProfiles().size() == 3);
+		profiles = new ArrayList<Profile>();
+		profiles.add(profile1);
+		profiles.add(profile2);
+		bean.getProfiles().removeAll(profiles);
+		assertTrue(bean.getProfiles().size() == 1);
+		assertTrue(bean.getProfiles().get(0).getFace().equals("d"));
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -32,7 +32,11 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 	public Object intercept(Object dynamicObject, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 		try {
 			if (source.getClass().getMethod(method.getName(), method.getParameterTypes()) != null) {
-				return invokeSourceMethod(dynamicObject, method, args, proxy);
+				if (method.getName().equals("equals") && method.getParameterTypes().length == 1) {
+					return invokeEquals(source, args.length > 0 ? args[0] : null);
+				} else {
+					return invokeSourceMethod(dynamicObject, method, args, proxy);
+				}
 			}
 		} catch (SecurityException e) {
 			Logger.error(e);
@@ -93,6 +97,16 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 
 	protected Object invokeSourceMethod(Object dynamicObject, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 		return proxy.invoke(source, args);
+	}
+
+	protected boolean invokeEquals(Object src, Object dest) {
+		if (src != null && src instanceof DynamicObject) {
+			src = ((DynamicObject) src).getSource();
+		}
+		if (dest != null && dest instanceof DynamicObject) {
+			dest = ((DynamicObject) dest).getSource();
+		}
+		return src.equals(dest);
 	}
 
 	protected boolean hasInterface(Class<?> cls) {
