@@ -20,9 +20,9 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 
 	protected Object source; // TODO may be no need
 
-	protected Class<? extends DynamicInterface>[] interfaces;
+	protected Class<? extends DynamicObject>[] interfaces;
 
-	public DynamicMethodInterceptor(Object source, Class<? extends DynamicInterface>[] interfaces) {
+	public DynamicMethodInterceptor(Object source, Class<? extends DynamicObject>[] interfaces) {
 		super();
 		this.source = source;
 		this.interfaces = interfaces;
@@ -47,8 +47,8 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 	}
 
 	protected Object getInterfaceFieldValue(Object dynamicObject, Method method) {
-		Class<? extends DynamicInterface> interfaceClass = null;
-		for (Class<? extends DynamicInterface> cls : interfaces) {
+		Class<? extends DynamicObject> interfaceClass = null;
+		for (Class<? extends DynamicObject> cls : interfaces) {
 			try {
 				if (cls.getMethod(method.getName(), method.getParameterTypes()) != null) {
 					interfaceClass = cls;
@@ -96,7 +96,7 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 	}
 
 	protected boolean hasInterface(Class<?> cls) {
-		for (Class<? extends DynamicInterface> i : interfaces) {
+		for (Class<? extends DynamicObject> i : interfaces) {
 			if (i == cls) {
 				return true;
 			}

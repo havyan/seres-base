@@ -19,7 +19,7 @@ import net.sf.cglib.proxy.MethodProxy;
  */
 public class ListMethodInterceptor extends DynamicMethodInterceptor {
 
-	public ListMethodInterceptor(Collection<?> source, Class<? extends DynamicInterface>[] interfaces) {
+	public ListMethodInterceptor(Collection<?> source, Class<? extends DynamicObject>[] interfaces) {
 		super(source, interfaces);
 		convert();
 	}
@@ -46,11 +46,7 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 		Object[] array = list.toArray();
 		list.clear();
 		for (Object e : array) {
-			try {
-				list.add(convert2Bean(e));
-			} catch (Exception ex) {
-				Logger.error(ex);
-			}
+			list.add(convert2Bean(e));
 		}
 	}
 
@@ -65,7 +61,7 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 		}
 	}
 
-	protected Object convert2Bean(Object target) throws Exception {
+	protected Object convert2Bean(Object target) {
 		if (target instanceof Bean) {
 			return target;
 		} else {

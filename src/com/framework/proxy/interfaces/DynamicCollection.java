@@ -1,9 +1,9 @@
 package com.framework.proxy.interfaces;
 
 import com.framework.events.ChangeListener;
-import com.framework.proxy.DynamicInterface;
+import com.framework.proxy.DynamicObject;
 
-public interface DynamicCollection extends DynamicInterface {
+public interface DynamicCollection extends DynamicObject {
 
 	public void addChangeListener(ChangeListener l);
 

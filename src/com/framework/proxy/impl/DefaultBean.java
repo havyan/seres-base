@@ -3,33 +3,35 @@
  */
 package com.framework.proxy.impl;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.framework.common.BaseUtils;
+import com.framework.events.ChangeEvent;
+import com.framework.events.ChangeListener;
 import com.framework.log.Logger;
-import com.framework.proxy.DynamicObjectFactory;
+import com.framework.proxy.DynamicObjectFactory2;
 import com.framework.proxy.interfaces.Bean;
+import com.framework.proxy.interfaces.DynamicCollection;
 
 /**
  * @author HWYan
  * 
  */
-public class DefaultBean implements Bean {
+public class DefaultBean implements Bean, ChangeListener {
 
 	private Object source;
 
-	private int status = NEW;
+	private List<String> changes = new ArrayList<String>();
 
-	private Map<String, Object> changedProperties = new HashMap<String, Object>();
+	private Map<String, Bean> complexes = new HashMap<String, Bean>();
 
-	private Map<String, Object> complexProperties = new HashMap<String, Object>();
+	private Map<String, DynamicCollection> lists = new HashMap<String, DynamicCollection>();
 
 	protected transient PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
@@ -42,69 +44,45 @@ public class DefaultBean implements Bean {
 	}
 
 	@Override
-	public int getStatus() {
-		return status;
-	}
-
-	@Override
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	@Override
 	public void setProperty(String propertyName, Object value) {
-		Logger.info("begin set propety name &" + propertyName);
+		Logger.debug("begin set propety name @" + propertyName);
 		if (source != null) {
-			if (status != DELETED) {
-				if (status == NEW) {
-					BaseUtils.setProperty(source, propertyName, value);
-				} else if (status == UNCHANGED) {
-					changedProperties.put(propertyName, value);
-					status = UPDATED;
-				} else if (status == UPDATED) {
-					changedProperties.put(propertyName, value);
-				}
+			Object current = BaseUtils.getProperty(source, propertyName);
+			if ((current != null && value != null && !current.equals(value)) || current != value) {
+				BaseUtils.setProperty(source, propertyName, value);
+				changes.add(propertyName);
+				complexes.remove(propertyName);
+				lists.remove(propertyName);
+				firePropertyChange(propertyName, value, current);
 			}
 		}
-		Logger.info("end set propety name &" + propertyName);
+		Logger.debug("end set propety name @" + propertyName);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object getProperty(String propertyName) {
 		if (source != null) {
-			if (changedProperties.containsKey(propertyName)) {
-				return changedProperties.get(propertyName);
+			if (complexes.containsKey(propertyName)) {
+				return complexes.get(propertyName);
+			} else if (lists.containsKey(propertyName)) {
+				return lists.get(propertyName);
 			} else {
-				if (complexProperties.containsKey(propertyName)) {
-					return complexProperties.get(propertyName);
-				} else {
-					Method getter = BaseUtils.getReadMethod(source, propertyName);
-					if (!getter.getReturnType().isPrimitive() && !Modifier.isFinal(getter.getReturnType().getModifiers())) {
-						Object value = BaseUtils.getProperty(source, propertyName);
-						if (value != null) {
-							if (List.class.isInstance(value)) {
-								List dynamicList = (List<?>) BaseUtils.newInstance(value.getClass());
-								for (Object obj : (List<?>) value) {
-									if (!(obj instanceof Bean)) {
-										obj = DynamicObjectFactory.createDynamicBeanObject((Bean) obj);
-										((Bean) obj).addPropertyChangeListener(this);
-									}
-									((Bean) obj).setStatus(Bean.UNCHANGED);
-									dynamicList.add(obj);
-								}
-								value = dynamicList;
-							} else {
-								value = DynamicObjectFactory.createDynamicBeanObject(value);
-								((Bean) value).addPropertyChangeListener(this);
-							}
-							complexProperties.put(propertyName, value);
+				Object value = BaseUtils.getProperty(source, propertyName);
+				if (value != null && !value.getClass().isPrimitive() && !Modifier.isFinal(value.getClass().getModifiers())) {
+					if (List.class.isInstance(value)) {
+						if (!(value instanceof DynamicCollection)) {
+							value = DynamicObjectFactory2.createDynamicListObject((List<?>) value);
 						}
-						return value;
+						lists.put(propertyName, (DynamicCollection) value);
+					} else {
+						if (!(value instanceof Bean)) {
+							value = DynamicObjectFactory2.createDynamicBeanObject(value);
+						}
+						complexes.put(propertyName, (Bean) value);
 					}
 				}
+				return value;
 			}
-			return BaseUtils.getProperty(source, propertyName);
 		}
 		return null;
 	}
@@ -134,52 +112,26 @@ public class DefaultBean implements Bean {
 		changeSupport.firePropertyChange(propertyName, oldValue, newValue);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public boolean flushPropertyChange() {
-		boolean changed = changedProperties.size() > 0;
-		for (Map.Entry<String, Object> entry : changedProperties.entrySet()) {
-			BaseUtils.setProperty(source, entry.getKey(), entry.getValue());
-		}
+	public void change(ChangeEvent e) {
 
-		for (Map.Entry<String, Object> entry : complexProperties.entrySet()) {
-			if (entry.getValue() instanceof Bean) {
-				changed = changed || ((Bean) entry.getValue()).flushPropertyChange();
-			} else if (entry.getValue() instanceof List) {
-				List currentList = (List) entry.getValue();
-				List srcList = (List) getProperty(entry.getKey());
-				if (!changed) {
-					boolean listNotChanged = currentList.size() == srcList.size();
-					if (listNotChanged) {
-						for (int i = 0; i < srcList.size(); i++) {
-							listNotChanged = listNotChanged && srcList.get(i) == currentList.get(i);
-						}
-					}
-					changed = changed || !listNotChanged;
-				}
-				srcList.clear();
-				for (Object obj : currentList) {
-					Object srcObject = obj;
-					if (obj instanceof Bean) {
-						changed = changed || ((Bean) obj).flushPropertyChange();
-						srcObject = ((Bean) obj).getSource();
-					}
-					srcList.add(srcObject);
-				}
+	}
+
+	@Override
+	public boolean isChanged() {
+		if (changes.size() > 0) {
+			return true;
+		} else {
+			boolean changed = false;
+			for (Map.Entry<String, DynamicCollection> entry : lists.entrySet()) {
+				changed = changed || entry.getValue().isChanged();
 			}
+
+			for (Map.Entry<String, Bean> entry : complexes.entrySet()) {
+				changed = changed || entry.getValue().isChanged();
+			}
+			return changed;
 		}
-
-		return changed;
-	}
-
-	@Override
-	public void cancelPropertyChange() {
-		changedProperties.clear();
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-
 	}
 
 }

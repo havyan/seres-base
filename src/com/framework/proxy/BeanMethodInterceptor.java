@@ -16,7 +16,7 @@ import com.framework.proxy.interfaces.Bean;
  */
 public class BeanMethodInterceptor extends DynamicMethodInterceptor {
 
-	public BeanMethodInterceptor(Object source, Class<? extends DynamicInterface>[] interfaces) {
+	public BeanMethodInterceptor(Object source, Class<? extends DynamicObject>[] interfaces) {
 		super(source, interfaces);
 	}
 

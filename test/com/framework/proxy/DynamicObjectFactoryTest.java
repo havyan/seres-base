@@ -45,5 +45,11 @@ public class DynamicObjectFactoryTest extends TestCase {
 		list.add(new Person());
 		assertTrue(events.size() == 1);
 	}
+	
+	public void testEquals() {
+		Person person1 = new Person("Haowei", 31);
+		Person person2 = DynamicObjectFactory2.createDynamicBeanObject(person1);
+		assertTrue(person2.equals(person1));
+	}
 
 }

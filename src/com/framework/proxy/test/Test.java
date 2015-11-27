@@ -32,7 +32,6 @@ public class Test {
 		person.setName("haowei");
 		person.setAge(27);
 		person.toString();
-		((Bean) person).flushPropertyChange();
 		((Bean) person).setProperty("name", "xinxin");
 
 		System.out.println(ArrayList.class.isAssignableFrom(List.class));

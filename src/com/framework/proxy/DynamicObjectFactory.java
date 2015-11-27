@@ -26,7 +26,7 @@ public class DynamicObjectFactory {
 	private static final String CALLBACK_PREFIX = "CGLIB$CALLBACK_";
 
 	@SuppressWarnings("unchecked")
-	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicInterface>[] interfaces, DynamicInterface[] impls) {
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicObject>[] interfaces, DynamicObject[] impls) {
 		if (target != null && !target.getClass().isPrimitive() && !Modifier.isFinal(target.getClass().getModifiers())) {
 			T dynamicObject = null;
 			if (interfaces.length == impls.length) {
@@ -70,11 +70,11 @@ public class DynamicObjectFactory {
 		}
 	}
 
-	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicInterface>[] interfaces,
-			Class<? extends DynamicInterface>[] implClasses) {
-		DynamicInterface[] impls = new DynamicInterface[implClasses.length];
+	public static <T> T createDynamicObject(T target, MethodInterceptor methodInterceptor, Class<? extends DynamicObject>[] interfaces,
+			Class<? extends DynamicObject>[] implClasses) {
+		DynamicObject[] impls = new DynamicObject[implClasses.length];
 		for (int i = 0; i < impls.length; i++) {
-			impls[i] = (DynamicInterface) BaseUtils.newInstance(implClasses[i]);
+			impls[i] = (DynamicObject) BaseUtils.newInstance(implClasses[i]);
 			impls[i].setSource(target);
 		}
 
@@ -83,8 +83,8 @@ public class DynamicObjectFactory {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicBeanObject(T target) {
-		Class<? extends DynamicInterface>[] interfaces = new Class[] { Bean.class };
-		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicInterface[] { new DefaultBean(target) });
+		Class<? extends DynamicObject>[] interfaces = new Class[] { Bean.class };
+		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new DefaultBean(target) });
 	}
 
 	private static String createClassKey(Object target, Class<? extends Callback>[] interfaces) {
