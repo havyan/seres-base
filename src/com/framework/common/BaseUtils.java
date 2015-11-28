@@ -54,6 +54,15 @@ public class BaseUtils {
 		return primitiveWrapperMap.get(name);
 	}
 
+	public static Class<?> getClass(String name) {
+		try {
+			return ClassUtils.getClass(name);
+		} catch (ClassNotFoundException e) {
+			Logger.error(e);
+		}
+		return null;
+	}
+
 	public static Object deepClone(Object obj) {
 		Object cloneObject = null;
 		try {
