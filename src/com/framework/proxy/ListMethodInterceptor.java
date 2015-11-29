@@ -21,12 +21,17 @@ import net.sf.cglib.proxy.MethodProxy;
  */
 public class ListMethodInterceptor extends DynamicMethodInterceptor {
 
+	private DynamicCollection dynamicList;
+
 	public ListMethodInterceptor(Collection<?> source, Class<? extends DynamicObject>[] interfaces) {
 		super(source, interfaces);
 		convertList();
 	}
 
 	protected Object invokeSourceMethod(Object dynamicObject, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+		if (dynamicList == null && dynamicObject != null) {
+			this.dynamicList = (DynamicCollection) dynamicObject;
+		}
 		List<?> list = (List<?>) source;
 		Object[] origin = list.toArray();
 		Object result = proxy.invoke(source, convertArgs(args));
@@ -104,13 +109,35 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 	}
 
 	protected Object convert2DynamicObject(Object target) {
-		if (target instanceof Bean || target instanceof DynamicCollection || (target.getClass().isPrimitive() && Modifier.isFinal(target.getClass().getModifiers()))) {
-			return target;
+		Object result = null;
+		if (target instanceof Bean || (target.getClass().isPrimitive() && Modifier.isFinal(target.getClass().getModifiers()))) {
+			result = target;
 		} else {
 			if (List.class.isInstance(target)) {
-				return DynamicObjectFactory2.createDynamicListObject((List<?>) target);
+				result = DynamicObjectFactory2.createDynamicListObject((List<?>) target);
 			} else {
-				return DynamicObjectFactory2.createDynamicBeanObject(target);
+				result = DynamicObjectFactory2.createDynamicBeanObject(target);
+			}
+		}
+		if (result instanceof Bean) {
+			Bean bean = (Bean) result;
+			bean.addPropertyChangeListener((e) -> {
+				List<?> list = (List<?>) source;
+				int index = list.indexOf(bean);
+				if (index != -1) {
+					firePropertyChange(index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+				}
+			});
+		}
+
+		return result;
+	}
+
+	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+		if (dynamicList != null) {
+			if (hasInterface(DynamicCollection.class)) {
+				DynamicCollection dynamicCollection = getInterfaceFieldValue(dynamicList, DynamicCollection.class);
+				dynamicCollection.firePropertyChange(propertyName, oldValue, newValue);
 			}
 		}
 	}

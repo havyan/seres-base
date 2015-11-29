@@ -53,7 +53,7 @@ public class DefaultBean implements Bean, ChangeListener {
 				changes.add(propertyName);
 				complexes.remove(propertyName);
 				lists.remove(propertyName);
-				firePropertyChange(propertyName, value, current);
+				firePropertyChange(propertyName, current, value);
 			}
 		}
 		Logger.debug("end set propety name @" + propertyName);
@@ -70,21 +70,44 @@ public class DefaultBean implements Bean, ChangeListener {
 				Object value = BaseUtils.getProperty(source, propertyName);
 				if (value != null && !value.getClass().isPrimitive() && !Modifier.isFinal(value.getClass().getModifiers())) {
 					if (List.class.isInstance(value)) {
-						if (!(value instanceof DynamicCollection)) {
-							value = DynamicObjectFactory2.createDynamicListObject((List<?>) value);
-						}
-						lists.put(propertyName, (DynamicCollection) value);
+						lists.put(propertyName, createDynamicList(propertyName, (List<?>) value));
 					} else {
-						if (!(value instanceof Bean)) {
-							value = DynamicObjectFactory2.createDynamicBeanObject(value);
-						}
-						complexes.put(propertyName, (Bean) value);
+						complexes.put(propertyName, createBean(propertyName, value));
 					}
 				}
 				return value;
 			}
 		}
 		return null;
+	}
+
+	protected Bean createBean(String propertyName, Object value) {
+		Bean bean = null;
+		if (value instanceof Bean) {
+			bean = (Bean) value;
+		} else {
+			bean = (Bean) DynamicObjectFactory2.createDynamicBeanObject(value);
+		}
+		bean.addPropertyChangeListener((e) -> {
+			firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+		});
+		return bean;
+	}
+
+	protected DynamicCollection createDynamicList(String propertyName, List<?> list) {
+		DynamicCollection dynamicCollection = null;
+		if (list instanceof DynamicCollection) {
+			dynamicCollection = (DynamicCollection) list;
+		} else {
+			dynamicCollection = (DynamicCollection) DynamicObjectFactory2.createDynamicListObject(list);
+		}
+		dynamicCollection.addChangeListener((e) -> {
+			firePropertyChange(propertyName, e.getSource(), e.getSource());
+		});
+		dynamicCollection.addPropertyChangeListener((e) -> {
+			firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+		});
+		return dynamicCollection;
 	}
 
 	public Object getSource() {

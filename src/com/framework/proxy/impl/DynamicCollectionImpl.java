@@ -1,7 +1,10 @@
 package com.framework.proxy.impl;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 
+import com.framework.common.BaseUtils;
 import com.framework.events.ChangeListener;
 import com.framework.events.ChangeSupport;
 import com.framework.proxy.interfaces.DynamicCollection;
@@ -9,6 +12,8 @@ import com.framework.proxy.interfaces.DynamicCollection;
 public class DynamicCollectionImpl implements DynamicCollection {
 
 	private ChangeSupport<Collection<?>> changeSupport;
+
+	protected transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
 	private Object[] origin;
 
@@ -63,6 +68,33 @@ public class DynamicCollectionImpl implements DynamicCollection {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public void setProperty(String propertyName, Object value) {
+		BaseUtils.setProperty(source, propertyName, value);
+	}
+
+	@Override
+	public Object getProperty(String propertyName) {
+		return BaseUtils.getProperty(source, propertyName);
+	}
+
+	public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
+		propertyChangeSupport.addPropertyChangeListener(l);
+	}
+
+	@Override
+	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+		propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
+	}
+
+	public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
+		propertyChangeSupport.removePropertyChangeListener(l);
+	}
+
+	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+		propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
 	}
 
 }

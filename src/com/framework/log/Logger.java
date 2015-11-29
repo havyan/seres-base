@@ -32,7 +32,7 @@ public class Logger {
 	}
 
 	public static void debug(String msg) {
-		System.out.println(new Date().toString() + "[Info]: " + msg);
+		System.out.println(new Date().toString() + "[Debug]: " + msg);
 	}
 
 }

@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ClassUtils;
@@ -38,6 +40,8 @@ import com.framework.log.Logger;
  * 
  */
 public class BaseUtils {
+
+	private static String RE_LIST_PROPERTY = "((^|\\.)(\\d))(\\.|$)";
 
 	private static final Map<String, Class<?>> primitiveWrapperMap = new HashMap<String, Class<?>>();
 
@@ -105,7 +109,6 @@ public class BaseUtils {
 		try {
 			return target.getClass().getDeclaredField(fieldName) != null;
 		} catch (Exception e) {
-			Logger.info(e);
 			return false;
 		}
 	}
@@ -133,7 +136,7 @@ public class BaseUtils {
 
 	public static Object getProperty(Object bean, String propertyName) {
 		try {
-			return PropertyUtils.getProperty(bean, propertyName);
+			return PropertyUtils.getProperty(bean, convertPropertyName(propertyName));
 		} catch (Exception e) {
 			Logger.error(e);
 			return null;
@@ -142,10 +145,32 @@ public class BaseUtils {
 
 	public static void setProperty(Object bean, String propertyName, Object value) {
 		try {
-			PropertyUtils.setProperty(bean, propertyName, value);
+			PropertyUtils.setProperty(bean, convertPropertyName(propertyName), value);
 		} catch (Exception e) {
 			Logger.error(e);
 		}
+	}
+
+	public static String convertPropertyName(String propertyName) {
+		propertyName = propertyName.trim();
+		String result = propertyName;
+		Pattern pattern = Pattern.compile(RE_LIST_PROPERTY);
+		Matcher matcher = pattern.matcher(propertyName);
+		while (matcher.find()) {
+			String find = matcher.group();
+			String indexString = "[" + matcher.group(3) + "]";
+			if (find.startsWith(".") && find.endsWith(".")) {
+				String replace = find.replace(matcher.group(1), indexString);
+				result = result.replace(find, replace);
+			} else if (find.endsWith(".")) {
+				result = indexString + "." + result.substring(find.length());
+			} else if (find.startsWith(".")) {
+				result = result.substring(0, result.length() - find.length()) + indexString;
+			} else {
+				result = indexString;
+			}
+		}
+		return result;
 	}
 
 	public static Object newInstance(Class<?> cl) {

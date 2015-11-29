@@ -41,7 +41,7 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 		} catch (SecurityException e) {
 			Logger.error(e);
 		} catch (NoSuchMethodException e) {
-			Logger.info(e);
+			Logger.debug("No method found: " + e.getMessage());
 		}
 		Object interfaceFieldValue = getInterfaceFieldValue(dynamicObject, method);
 		if (interfaceFieldValue != null) {
