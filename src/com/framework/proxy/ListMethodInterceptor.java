@@ -88,9 +88,11 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 		} else {
 			List<?> list = (List<?>) source;
 			for (Object e : list) {
-				DynamicObject dynamicObject = (DynamicObject) e;
-				if (dynamicObject.getSource() == arg) {
-					return dynamicObject;
+				if (e instanceof DynamicObject) {
+					DynamicObject dynamicObject = (DynamicObject) e;
+					if (dynamicObject.getSource() == arg) {
+						return dynamicObject;
+					}
 				}
 			}
 		}
