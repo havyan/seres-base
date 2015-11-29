@@ -58,6 +58,15 @@ public class BaseUtils {
 		return primitiveWrapperMap.get(name);
 	}
 
+	public static boolean isClass(String name) {
+		try {
+			Class<?> cls = ClassUtils.getClass(name);
+			return cls != null;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
 	public static Class<?> getClass(String name) {
 		try {
 			return ClassUtils.getClass(name);

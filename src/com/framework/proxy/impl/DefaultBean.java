@@ -102,7 +102,7 @@ public class DefaultBean implements Bean, ChangeListener {
 			dynamicCollection = (DynamicCollection) DynamicObjectFactory2.createDynamicListObject(list);
 		}
 		dynamicCollection.addChangeListener((e) -> {
-			firePropertyChange(propertyName, e.getSource(), e.getSource());
+			firePropertyChange(propertyName, null, e.getSource());
 		});
 		dynamicCollection.addPropertyChangeListener((e) -> {
 			firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
@@ -132,6 +132,7 @@ public class DefaultBean implements Bean, ChangeListener {
 	}
 
 	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+		Logger.debug("Property Changed: " + propertyName);
 		changeSupport.firePropertyChange(propertyName, oldValue, newValue);
 	}
 
