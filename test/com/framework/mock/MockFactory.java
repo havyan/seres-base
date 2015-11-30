@@ -1,10 +1,12 @@
 package com.framework.mock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MockFactory {
-	
+
 	public static Person createPerson() {
 		Person person = new Person("Haowei", 31);
 		List<Profile> profiles = new ArrayList<Profile>();
@@ -18,6 +20,10 @@ public class MockFactory {
 		profiles.add(profile4);
 		person.setProfiles(profiles);
 		person.setProfile(new Profile("e", 170, 140));
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("attr1", "value1");
+		map.put("attr2", "value2");
+		person.setMap(map);
 		return person;
 	}
 

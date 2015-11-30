@@ -12,8 +12,10 @@ import com.framework.common.BaseUtils;
 import com.framework.log.Logger;
 import com.framework.proxy.impl.BeanImpl;
 import com.framework.proxy.impl.DynamicCollectionImpl;
+import com.framework.proxy.impl.DynamicMapImpl;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
+import com.framework.proxy.interfaces.DynamicMap;
 
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
@@ -88,12 +90,14 @@ public class DynamicObjectFactory2 {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicObject(T target) {
-		if (target instanceof Bean) {
+		if (target instanceof Bean || (target.getClass().isPrimitive() && Modifier.isFinal(target.getClass().getModifiers()))) {
 			return target;
 		} else {
 			if (target instanceof List) {
 				return (T) createDynamicListObject((List<?>) target);
-			} else {
+			} else if(target instanceof Map){
+				return (T) createDynamicMapObject((Map<?, ?>) target);
+			}else{
 				return createDynamicBeanObject(target);
 			}
 		}
@@ -109,6 +113,12 @@ public class DynamicObjectFactory2 {
 	public static <T extends List<?>> T createDynamicListObject(T target) {
 		Class<? extends DynamicObject>[] interfaces = new Class[] { DynamicCollection.class };
 		return createDynamicObject(target, new ListMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new DynamicCollectionImpl(target) });
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Map<?, ?>> T createDynamicMapObject(T target) {
+		Class<? extends DynamicObject>[] interfaces = new Class[] { DynamicMap.class };
+		return createDynamicObject(target, new MapMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new DynamicMapImpl(target) });
 	}
 
 	static class ProxyInfo {

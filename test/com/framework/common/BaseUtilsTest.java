@@ -21,4 +21,10 @@ public class BaseUtilsTest  extends TestCase{
 		assertEquals(BaseUtils.getProperty(person, "name"), "Haowei");
 	}
 	
+	public void testSetProperty() {
+		Person person = MockFactory.createPerson();
+		assertEquals(BaseUtils.getProperty(person, "map.attr1"), "value1");
+		assertEquals(BaseUtils.getProperty(person.getMap(), "attr1"), "value1");
+	}
+	
 }

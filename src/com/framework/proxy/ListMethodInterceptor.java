@@ -3,12 +3,13 @@
  */
 package com.framework.proxy;
 
+import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 
 import com.framework.common.BaseUtils;
+import com.framework.events.PropertyChangeAdapter;
 import com.framework.log.Logger;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
@@ -104,35 +105,34 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 		List list = (List) source;
 		for (int i = 0; i < list.size(); i++) {
 			Object e = list.get(i);
-			if (!(e instanceof Bean)) {
+			if (e instanceof Bean) {
+				bindBean((Bean) e);
+			} else {
 				list.set(i, convert2DynamicObject(e));
 			}
 		}
 	}
 
 	protected Object convert2DynamicObject(Object target) {
-		Object result = null;
-		if (target instanceof Bean || (target.getClass().isPrimitive() && Modifier.isFinal(target.getClass().getModifiers()))) {
-			result = target;
-		} else {
-			if (List.class.isInstance(target)) {
-				result = DynamicObjectFactory2.createDynamicListObject((List<?>) target);
-			} else {
-				result = DynamicObjectFactory2.createDynamicBeanObject(target);
-			}
-		}
+		Object result = DynamicObjectFactory2.createDynamicObject(target);
 		if (result instanceof Bean) {
-			Bean bean = (Bean) result;
-			bean.addPropertyChangeListener((e) -> {
-				List<?> list = (List<?>) source;
-				int index = list.indexOf(bean);
-				if (index != -1) {
-					firePropertyChange(index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+			bindBean((Bean) result);
+		}
+		return result;
+	}
+
+	protected void bindBean(Bean bean) {
+		if (bean != null && !bean.hasPropertyChangeListenerFrom(this)) {
+			bean.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+				public void propertyChange(PropertyChangeEvent e) {
+					List<?> list = (List<?>) source;
+					int index = list.indexOf(bean);
+					if (index != -1) {
+						firePropertyChange(index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+					}
 				}
 			});
 		}
-
-		return result;
 	}
 
 	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {

@@ -28,4 +28,8 @@ public class ChangeSupport<T> {
 		}
 	}
 
+	public ChangeListener[] getListeners() {
+		return listeners.toArray(new ChangeListener[0]);
+	}
+
 }

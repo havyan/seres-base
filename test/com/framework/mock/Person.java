@@ -1,6 +1,7 @@
 package com.framework.mock;
 
 import java.util.List;
+import java.util.Map;
 
 public class Person {
 
@@ -11,6 +12,8 @@ public class Person {
 	private Profile profile;
 	
 	private List<Profile> profiles;
+	
+	private Map<String, String> map;
 
 	public Person() {
 		super();
@@ -52,5 +55,13 @@ public class Person {
 
 	public void setProfiles(List<Profile> profiles) {
 		this.profiles = profiles;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
 	}
 }

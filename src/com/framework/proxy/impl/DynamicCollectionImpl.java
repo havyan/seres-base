@@ -2,19 +2,17 @@ package com.framework.proxy.impl;
 
 import java.util.Collection;
 
-import com.framework.common.BaseUtils;
+import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeListener;
 import com.framework.events.ChangeSupport;
 import com.framework.proxy.interfaces.AbstractBean;
 import com.framework.proxy.interfaces.DynamicCollection;
 
-public class DynamicCollectionImpl extends AbstractBean implements DynamicCollection {
+public class DynamicCollectionImpl extends AbstractBean<Collection<?>> implements DynamicCollection {
 
 	private ChangeSupport<Collection<?>> changeSupport;
 
 	private Object[] origin;
-
-	private Collection<?> source;
 
 	public DynamicCollectionImpl(Collection<?> source) {
 		super();
@@ -35,14 +33,21 @@ public class DynamicCollectionImpl extends AbstractBean implements DynamicCollec
 		changeSupport.fireChange();
 	}
 
-	@Override
-	public Collection<?> getSource() {
-		return source;
+	public void removeChangeListenerByFrom(Object from) {
+		for (ChangeListener l : changeSupport.getListeners()) {
+			if (l instanceof ChangeAdapter && ((ChangeAdapter) l).getFrom() == from) {
+				removeChangeListener(l);
+			}
+		}
 	}
 
-	@Override
-	public void setSource(Object source) {
-		this.source = (Collection<?>) source;
+	public boolean hasChangeListenerFrom(Object from) {
+		for (ChangeListener l : changeSupport.getListeners()) {
+			if (l instanceof ChangeAdapter && ((ChangeAdapter) l).getFrom() == from) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -65,16 +70,6 @@ public class DynamicCollectionImpl extends AbstractBean implements DynamicCollec
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public void setProperty(String propertyName, Object value) {
-		BaseUtils.setProperty(source, propertyName, value);
-	}
-
-	@Override
-	public Object getProperty(String propertyName) {
-		return BaseUtils.getProperty(source, propertyName);
 	}
 
 }

@@ -3,6 +3,7 @@
  */
 package com.framework.proxy.impl;
 
+import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.framework.common.BaseUtils;
+import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeEvent;
 import com.framework.events.ChangeListener;
+import com.framework.events.PropertyChangeAdapter;
 import com.framework.log.Logger;
 import com.framework.proxy.DynamicObjectFactory2;
 import com.framework.proxy.interfaces.AbstractBean;
@@ -22,9 +25,7 @@ import com.framework.proxy.interfaces.DynamicCollection;
  * @author HWYan
  * 
  */
-public class BeanImpl extends AbstractBean implements ChangeListener {
-
-	private Object source;
+public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 
 	private List<String> changes = new ArrayList<String>();
 
@@ -85,9 +86,13 @@ public class BeanImpl extends AbstractBean implements ChangeListener {
 		} else {
 			bean = (Bean) DynamicObjectFactory2.createDynamicBeanObject(value);
 		}
-		bean.addPropertyChangeListener((e) -> {
-			firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
-		});
+		if (!bean.hasPropertyChangeListenerFrom(this)) {
+			bean.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+				public void propertyChange(PropertyChangeEvent e) {
+					firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+				}
+			});
+		}
 		return bean;
 	}
 
@@ -98,21 +103,21 @@ public class BeanImpl extends AbstractBean implements ChangeListener {
 		} else {
 			dynamicCollection = (DynamicCollection) DynamicObjectFactory2.createDynamicListObject(list);
 		}
-		dynamicCollection.addChangeListener((e) -> {
-			firePropertyChange(propertyName, null, e.getSource());
-		});
-		dynamicCollection.addPropertyChangeListener((e) -> {
-			firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
-		});
+		if (!dynamicCollection.hasChangeListenerFrom(this)) {
+			dynamicCollection.addChangeListener(new ChangeAdapter(this) {
+				public void change(ChangeEvent e) {
+					firePropertyChange(propertyName, null, e.getSource());
+				}
+			});
+		}
+		if (!dynamicCollection.hasPropertyChangeListenerFrom(this)) {
+			dynamicCollection.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+				public void propertyChange(PropertyChangeEvent e) {
+					firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+				}
+			});
+		}
 		return dynamicCollection;
-	}
-
-	public Object getSource() {
-		return source;
-	}
-
-	public void setSource(Object source) {
-		this.source = source;
 	}
 
 	@Override

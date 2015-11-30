@@ -20,6 +20,10 @@ public interface Bean extends DynamicObject {
 	public void addPropertyChangeListener(PropertyChangeListener l);
 
 	public void removePropertyChangeListener(PropertyChangeListener l);
+	
+	public void removePropertyChangeListenerByFrom(Object from);
+	
+	public boolean hasPropertyChangeListenerFrom(Object from);
 
 	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
 
