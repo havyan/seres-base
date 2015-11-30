@@ -278,6 +278,9 @@ public class BaseUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createObject(Class<T> cls, String text) {
+		if(cls == String.class) {
+			return (T) text;
+		}
 		cls = (Class<T>) getWraapedClass(cls);
 		try {
 			Constructor<T> constructor = cls.getConstructor(String.class);
