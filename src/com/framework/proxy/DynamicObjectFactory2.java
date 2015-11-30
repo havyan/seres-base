@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import com.framework.common.BaseUtils;
 import com.framework.log.Logger;
-import com.framework.proxy.impl.DefaultBean;
+import com.framework.proxy.impl.BeanImpl;
 import com.framework.proxy.impl.DynamicCollectionImpl;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
@@ -85,20 +85,24 @@ public class DynamicObjectFactory2 {
 
 		return createDynamicObject(target, methodInterceptor, interfaces, impls);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static <T> T createDynamicObject(T  target) {
-		if(target instanceof List) {
-			return (T) createDynamicListObject((List<?>) target);
+	public static <T> T createDynamicObject(T target) {
+		if (target instanceof Bean) {
+			return target;
 		} else {
-			return createDynamicBeanObject(target);
+			if (target instanceof List) {
+				return (T) createDynamicListObject((List<?>) target);
+			} else {
+				return createDynamicBeanObject(target);
+			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicBeanObject(T target) {
 		Class<? extends DynamicObject>[] interfaces = new Class[] { Bean.class };
-		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new DefaultBean(target) });
+		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new BeanImpl(target) });
 	}
 
 	@SuppressWarnings("unchecked")

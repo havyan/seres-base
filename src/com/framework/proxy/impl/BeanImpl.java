@@ -3,8 +3,6 @@
  */
 package com.framework.proxy.impl;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +14,7 @@ import com.framework.events.ChangeEvent;
 import com.framework.events.ChangeListener;
 import com.framework.log.Logger;
 import com.framework.proxy.DynamicObjectFactory2;
+import com.framework.proxy.interfaces.AbstractBean;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
 
@@ -23,7 +22,7 @@ import com.framework.proxy.interfaces.DynamicCollection;
  * @author HWYan
  * 
  */
-public class DefaultBean implements Bean, ChangeListener {
+public class BeanImpl extends AbstractBean implements ChangeListener {
 
 	private Object source;
 
@@ -33,13 +32,11 @@ public class DefaultBean implements Bean, ChangeListener {
 
 	private Map<String, DynamicCollection> lists = new HashMap<String, DynamicCollection>();
 
-	protected transient PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-
-	public DefaultBean() {
+	public BeanImpl() {
 
 	}
 
-	public DefaultBean(Object source) {
+	public BeanImpl(Object source) {
 		this.source = source;
 	}
 
@@ -116,24 +113,6 @@ public class DefaultBean implements Bean, ChangeListener {
 
 	public void setSource(Object source) {
 		this.source = source;
-	}
-
-	public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
-		changeSupport.addPropertyChangeListener(l);
-	}
-
-	@Override
-	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-		changeSupport.addPropertyChangeListener(propertyName, listener);
-	}
-
-	public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
-		changeSupport.removePropertyChangeListener(l);
-	}
-
-	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-		Logger.debug("Property Changed: " + propertyName);
-		changeSupport.firePropertyChange(propertyName, oldValue, newValue);
 	}
 
 	@Override

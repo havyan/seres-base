@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.framework.common.BaseUtils;
 import com.framework.log.Logger;
-import com.framework.proxy.impl.DefaultBean;
+import com.framework.proxy.impl.BeanImpl;
 import com.framework.proxy.interfaces.Bean;
 
 import net.sf.cglib.proxy.Callback;
@@ -84,7 +84,7 @@ public class DynamicObjectFactory {
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicBeanObject(T target) {
 		Class<? extends DynamicObject>[] interfaces = new Class[] { Bean.class };
-		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new DefaultBean(target) });
+		return createDynamicObject(target, new BeanMethodInterceptor(target, interfaces), interfaces, new DynamicObject[] { new BeanImpl(target) });
 	}
 
 	private static String createClassKey(Object target, Class<? extends Callback>[] interfaces) {
