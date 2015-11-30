@@ -85,6 +85,15 @@ public class DynamicObjectFactory2 {
 
 		return createDynamicObject(target, methodInterceptor, interfaces, impls);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T createDynamicObject(T  target) {
+		if(target instanceof List) {
+			return (T) createDynamicListObject((List<?>) target);
+		} else {
+			return createDynamicBeanObject(target);
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicBeanObject(T target) {
