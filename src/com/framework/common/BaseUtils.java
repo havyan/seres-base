@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -211,8 +212,21 @@ public class BaseUtils {
 		cl = getWraapedClass(cl);
 		Object obj = null;
 		try {
-			Constructor<?> constructor = cl.getConstructor(ccls);
-			obj = constructor.newInstance(values);
+			Constructor<?> constructor = null;
+			int paramsCount = values != null ? values.length : 0;
+			if (Arrays.asList(ccls).stream().anyMatch((cls) -> cls == null)) {
+				for (Constructor<?> c : cl.getConstructors()) {
+					if (c.getParameterCount() == paramsCount) {
+						constructor = c;
+						break;
+					}
+				}
+			} else {
+				constructor = cl.getConstructor(ccls);
+			}
+			if (constructor != null) {
+				obj = constructor.newInstance(values);
+			}
 		} catch (Exception e) {
 			Logger.error(e);
 			return null;
@@ -278,7 +292,7 @@ public class BaseUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createObject(Class<T> cls, String text) {
-		if(cls == String.class) {
+		if (cls == String.class) {
 			return (T) text;
 		}
 		cls = (Class<T>) getWraapedClass(cls);
