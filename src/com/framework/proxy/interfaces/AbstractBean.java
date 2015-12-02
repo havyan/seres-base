@@ -29,9 +29,13 @@ public abstract class AbstractBean<T> implements Bean {
 		if (propertyChangeListenerProxies == null) {
 			propertyChangeListenerProxies = new ArrayList<PropertyChangeListenerProxy>();
 		}
-		PropertyChangeListenerProxy listenerProxy = new PropertyChangeListenerProxy(this, listener) {
+		Object from = this;
+		if (listener instanceof PropertyChangeListenerProxy) {
+			from = ((PropertyChangeListenerProxy) listener).getFrom();
+		}
+		PropertyChangeListenerProxy listenerProxy = new PropertyChangeListenerProxy(from, listener) {
 			public void propertyChange(PropertyChangeEvent e) {
-				if (e.getPropertyName().equals(propertyName) || propertyName.startsWith(e.getPropertyName() + ".")) {
+				if (e.getPropertyName().equals(propertyName) || propertyName.startsWith(e.getPropertyName() + ".") || e.getPropertyName().equals("*")) {
 					listener.propertyChange(e);
 				}
 			}
@@ -88,6 +92,10 @@ public abstract class AbstractBean<T> implements Bean {
 	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
 		Logger.debug("Property [" + propertyName + "] Changed to " + newValue);
 		changeSupport.firePropertyChange(propertyName, oldValue, newValue);
+	}
+
+	public void fireChange() {
+		changeSupport.firePropertyChange("*", 0, 1);
 	}
 
 	@Override

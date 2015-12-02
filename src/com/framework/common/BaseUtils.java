@@ -34,7 +34,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ClassUtils;
 
+import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
+import com.framework.proxy.interfaces.Bean;
 
 /**
  * @author HWYan
@@ -122,7 +124,7 @@ public class BaseUtils {
 			return false;
 		}
 	}
-	
+
 	public static Object getFieldValue(Object target, String fieldName) {
 		try {
 			Field field = target.getClass().getDeclaredField(fieldName);
@@ -140,6 +142,28 @@ public class BaseUtils {
 		} catch (Exception e) {
 			Logger.info(e);
 			return false;
+		}
+	}
+
+	public static void takeBinds(Object source, Object dest, Object from) {
+		if (source != null && source instanceof Bean) {
+			Bean sourceBean = (Bean) source;
+			if (dest != null && dest instanceof Bean) {
+				Bean destBean = (Bean) dest;
+				PropertyChangeListenerProxy[] listeners = sourceBean.getPropertyChangeListenersFrom(from);
+				for (PropertyChangeListenerProxy listener : listeners) {
+					destBean.addPropertyChangeListener(listener);
+				}
+				Map<String, PropertyChangeListenerProxy[]> map = sourceBean.getPropertyChangeListenersMapFrom(from);
+				for (Map.Entry<String, PropertyChangeListenerProxy[]> entry : map.entrySet()) {
+					String propertyName = entry.getKey();
+					listeners = entry.getValue();
+					for (PropertyChangeListenerProxy listener : listeners) {
+						destBean.addPropertyChangeListener(propertyName, listener);
+					}
+				}
+			}
+			sourceBean.removeAllPropertyChangeListenerFrom(from);
 		}
 	}
 
