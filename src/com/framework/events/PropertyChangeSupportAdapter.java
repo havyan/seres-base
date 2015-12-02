@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PropertyChangeSupportProxy extends PropertyChangeSupport {
+public class PropertyChangeSupportAdapter extends PropertyChangeSupport {
 
 	private Set<String> propertyNames = new HashSet<String>();
 
-	public PropertyChangeSupportProxy(Object sourceBean) {
+	public PropertyChangeSupportAdapter(Object sourceBean) {
 		super(sourceBean);
 	}
 

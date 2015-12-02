@@ -9,14 +9,14 @@ import java.util.stream.Stream;
 
 import com.framework.common.BaseUtils;
 import com.framework.events.PropertyChangeListenerProxy;
-import com.framework.events.PropertyChangeSupportProxy;
+import com.framework.events.PropertyChangeSupportAdapter;
 import com.framework.log.Logger;
 
 public abstract class AbstractBean<T> implements Bean {
 
 	protected T source;
 
-	protected transient PropertyChangeSupportProxy changeSupport = new PropertyChangeSupportProxy(this);
+	protected transient PropertyChangeSupportAdapter changeSupport = new PropertyChangeSupportAdapter(this);
 
 	protected List<PropertyChangeListenerProxy> propertyChangeListenerProxies;
 
