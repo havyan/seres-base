@@ -14,7 +14,7 @@ import com.framework.common.BaseUtils;
 import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeEvent;
 import com.framework.events.ChangeListener;
-import com.framework.events.PropertyChangeAdapter;
+import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.DynamicObjectFactory2;
 import com.framework.proxy.interfaces.AbstractBean;
@@ -87,7 +87,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			bean = (Bean) DynamicObjectFactory2.createDynamicBeanObject(value);
 		}
 		if (!bean.hasPropertyChangeListenerFrom(this)) {
-			bean.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+			bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
 				public void propertyChange(PropertyChangeEvent e) {
 					firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
 				}
@@ -111,7 +111,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			});
 		}
 		if (!dynamicCollection.hasPropertyChangeListenerFrom(this)) {
-			dynamicCollection.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+			dynamicCollection.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
 				public void propertyChange(PropertyChangeEvent e) {
 					firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
 				}

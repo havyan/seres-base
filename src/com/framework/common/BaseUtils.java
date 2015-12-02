@@ -98,7 +98,7 @@ public class BaseUtils {
 		return cloneObject;
 	}
 
-	public static void setField(Object target, String fieldName, Object value) {
+	public static void setFieldValue(Object target, String fieldName, Object value) {
 		Field field = null;
 		try {
 			field = target.getClass().getDeclaredField(fieldName);
@@ -121,6 +121,17 @@ public class BaseUtils {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+	
+	public static Object getFieldValue(Object target, String fieldName) {
+		try {
+			Field field = target.getClass().getDeclaredField(fieldName);
+			field.setAccessible(true);
+			return field.get(target);
+		} catch (Exception e) {
+			Logger.error(e);
+		}
+		return null;
 	}
 
 	public static boolean hasMethod(Object target, String name, Class<?>... parameterTypes) {
@@ -314,7 +325,7 @@ public class BaseUtils {
 
 	public static Object getStaticValue(Class<?> cl, String field) {
 		try {
-			Field f = cl.getField(field);
+			Field f = cl.getDeclaredField(field);
 			f.setAccessible(true);
 			return f.get(cl);
 		} catch (Exception e) {

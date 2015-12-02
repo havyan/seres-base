@@ -8,7 +8,7 @@ import java.util.Set;
 
 import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeEvent;
-import com.framework.events.PropertyChangeAdapter;
+import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
 import com.framework.proxy.interfaces.DynamicMap;
@@ -67,7 +67,6 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 				map.put(entry.getKey(), entry.getValue());
 			}
 		}
-		map.clear();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -94,7 +93,7 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 	protected void bindBean(String propertyName, Bean bean) {
 		if (bean != null) {
 			if (!bean.hasPropertyChangeListenerFrom(this)) {
-				bean.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+				bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
 					public void propertyChange(PropertyChangeEvent e) {
 						firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
 					}

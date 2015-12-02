@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.framework.common.BaseUtils;
-import com.framework.events.PropertyChangeAdapter;
+import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
@@ -123,7 +123,7 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 
 	protected void bindBean(Bean bean) {
 		if (bean != null && !bean.hasPropertyChangeListenerFrom(this)) {
-			bean.addPropertyChangeListener(new PropertyChangeAdapter(this) {
+			bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
 				public void propertyChange(PropertyChangeEvent e) {
 					List<?> list = (List<?>) source;
 					int index = list.indexOf(bean);
