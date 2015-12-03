@@ -67,11 +67,22 @@ public class DynamicObjectFactoryTest extends TestCase {
 		list.add(new Person());
 		assertTrue(events.size() == 1);
 	}
-	
+
 	public void testEquals() {
 		Person person1 = new Person("Haowei", 31);
 		Person person2 = DynamicObjectFactory2.createDynamicBeanObject(person1);
 		assertTrue(person2.equals(person1));
+	}
+
+	public void testList() {
+		List<Person> list = new ArrayList<Person>();
+		Person person1 = new Person();
+		list.add(person1);
+		Person person2 = new Person();
+		list.add(person2);
+		list = DynamicObjectFactory2.createDynamicObject(list);
+		assertTrue(list.indexOf(person1) == 0);
+		assertTrue(list.indexOf(person2) == 1);
 	}
 
 }

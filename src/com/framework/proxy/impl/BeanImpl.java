@@ -31,8 +31,6 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 
 	private Map<String, Bean> complexes = new HashMap<String, Bean>();
 
-	private Map<String, DynamicCollection> lists = new HashMap<String, DynamicCollection>();
-
 	public BeanImpl() {
 
 	}
@@ -50,7 +48,6 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 				BaseUtils.setProperty(source, propertyName, value);
 				changes.add(propertyName);
 				complexes.remove(propertyName);
-				lists.remove(propertyName);
 				firePropertyChange(propertyName, current, value);
 			}
 		}
@@ -62,16 +59,12 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 		if (source != null) {
 			if (complexes.containsKey(propertyName)) {
 				return complexes.get(propertyName);
-			} else if (lists.containsKey(propertyName)) {
-				return lists.get(propertyName);
 			} else {
 				Object value = BaseUtils.getProperty(source, propertyName);
 				if (value != null && !value.getClass().isPrimitive() && !Modifier.isFinal(value.getClass().getModifiers())) {
-					if (List.class.isInstance(value)) {
-						lists.put(propertyName, createDynamicList(propertyName, (List<?>) value));
-					} else {
-						complexes.put(propertyName, createBean(propertyName, value));
-					}
+					Bean bean = createBean(propertyName, value);
+					complexes.put(propertyName, bean);
+					return bean;
 				}
 				return value;
 			}
@@ -84,7 +77,17 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 		if (value instanceof Bean) {
 			bean = (Bean) value;
 		} else {
-			bean = (Bean) DynamicObjectFactory2.createDynamicBeanObject(value);
+			bean = (Bean) DynamicObjectFactory2.createDynamicObject(value);
+		}
+		if (bean instanceof DynamicCollection) {
+			DynamicCollection dynamicCollection = (DynamicCollection) bean;
+			if (!dynamicCollection.hasChangeListenerFrom(this)) {
+				dynamicCollection.addChangeListener(new ChangeAdapter(this) {
+					public void change(ChangeEvent e) {
+						firePropertyChange(propertyName, null, e.getSource());
+					}
+				});
+			}
 		}
 		if (!bean.hasPropertyChangeListenerFrom(this)) {
 			bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
@@ -94,30 +97,6 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			});
 		}
 		return bean;
-	}
-
-	protected DynamicCollection createDynamicList(String propertyName, List<?> list) {
-		DynamicCollection dynamicCollection = null;
-		if (list instanceof DynamicCollection) {
-			dynamicCollection = (DynamicCollection) list;
-		} else {
-			dynamicCollection = (DynamicCollection) DynamicObjectFactory2.createDynamicListObject(list);
-		}
-		if (!dynamicCollection.hasChangeListenerFrom(this)) {
-			dynamicCollection.addChangeListener(new ChangeAdapter(this) {
-				public void change(ChangeEvent e) {
-					firePropertyChange(propertyName, null, e.getSource());
-				}
-			});
-		}
-		if (!dynamicCollection.hasPropertyChangeListenerFrom(this)) {
-			dynamicCollection.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
-				public void propertyChange(PropertyChangeEvent e) {
-					firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
-				}
-			});
-		}
-		return dynamicCollection;
 	}
 
 	@Override
@@ -131,10 +110,6 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			return true;
 		} else {
 			boolean changed = false;
-			for (Map.Entry<String, DynamicCollection> entry : lists.entrySet()) {
-				changed = changed || entry.getValue().isChanged();
-			}
-
 			for (Map.Entry<String, Bean> entry : complexes.entrySet()) {
 				changed = changed || entry.getValue().isChanged();
 			}

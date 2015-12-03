@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.net.URL;
 
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -38,22 +39,30 @@ public class XmlUtils {
 		}
 		return doc;
 	}
-	
+
 	public static void write(Document doc, String file) {
 		write(doc, new File(file));
 	}
-	
+
 	public static void write(Document doc, File file) {
-        try {
-            XMLOutputter xmlopt = new XMLOutputter();
-            FileWriter writer = new FileWriter(file);
-            Format fm = Format.getPrettyFormat();
-            xmlopt.setFormat(fm);
-            xmlopt.output(doc, writer);
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		try {
+			XMLOutputter xmlopt = new XMLOutputter();
+			FileWriter writer = new FileWriter(file);
+			Format fm = Format.getPrettyFormat();
+			xmlopt.setFormat(fm);
+			xmlopt.output(doc, writer);
+			writer.close();
+		} catch (Exception e) {
+			Logger.error(e);
+		}
+	}
+
+	public static void write(Element root, String file) {
+		write(new Document(root), file);
+	}
+
+	public static void write(Element root, File file) {
+		write(new Document(root), file);
+	}
 
 }
