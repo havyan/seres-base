@@ -3,6 +3,7 @@
  */
 package com.framework.common;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -150,9 +151,11 @@ public class BaseUtils {
 			Bean sourceBean = (Bean) source;
 			if (dest != null && dest instanceof Bean) {
 				Bean destBean = (Bean) dest;
+				PropertyChangeEvent event = new PropertyChangeEvent(dest, "*", 0, 1);
 				PropertyChangeListenerProxy[] listeners = sourceBean.getPropertyChangeListenersFrom(from);
 				for (PropertyChangeListenerProxy listener : listeners) {
 					destBean.addPropertyChangeListener(listener);
+					listener.propertyChange(event);
 				}
 				Map<String, PropertyChangeListenerProxy[]> map = sourceBean.getPropertyChangeListenersMapFrom(from);
 				for (Map.Entry<String, PropertyChangeListenerProxy[]> entry : map.entrySet()) {
@@ -160,6 +163,7 @@ public class BaseUtils {
 					listeners = entry.getValue();
 					for (PropertyChangeListenerProxy listener : listeners) {
 						destBean.addPropertyChangeListener(propertyName, listener);
+						listener.propertyChange(event);
 					}
 				}
 			}
