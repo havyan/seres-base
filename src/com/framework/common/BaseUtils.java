@@ -64,7 +64,7 @@ public class BaseUtils {
 
 	public static boolean isClass(String name) {
 		try {
-			Class<?> cls = ClassUtils.getClass(name);
+			Class<?> cls = Class.forName(name);
 			return cls != null;
 		} catch (ClassNotFoundException e) {
 			return false;
