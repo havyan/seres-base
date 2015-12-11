@@ -118,6 +118,14 @@ public class BaseUtils {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T getSource(T target) {
+		if (target != null && target instanceof Bean) {
+			return (T) ((Bean) target).getSource();
+		}
+		return target;
+	}
+
 	public static boolean hasField(Object target, String fieldName) {
 		try {
 			return target.getClass().getDeclaredField(fieldName) != null;
