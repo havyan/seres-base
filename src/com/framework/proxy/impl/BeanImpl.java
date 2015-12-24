@@ -57,10 +57,11 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 	@Override
 	public Object getProperty(String propertyName) {
 		if (source != null) {
-			if (complexes.containsKey(propertyName)) {
+			Object value = BaseUtils.getProperty(source, propertyName);
+			Bean complex = complexes.get(propertyName);
+			if (complex != null && complex.getSource() == value) {
 				return complexes.get(propertyName);
 			} else {
-				Object value = BaseUtils.getProperty(source, propertyName);
 				if (value != null && !value.getClass().isPrimitive() && !Modifier.isFinal(value.getClass().getModifiers())) {
 					Bean bean = createBean(propertyName, value);
 					complexes.put(propertyName, bean);
