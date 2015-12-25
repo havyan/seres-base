@@ -1,6 +1,8 @@
 package com.framework.events;
 
-public interface ChangeListener {
+import java.util.EventListener;
+
+public interface ChangeListener extends EventListener {
 
 	void change(ChangeEvent e);
 

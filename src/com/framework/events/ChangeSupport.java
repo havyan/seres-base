@@ -1,7 +1,6 @@
 package com.framework.events;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.swing.event.EventListenerList;
 
 public class ChangeSupport<T> {
 
@@ -11,25 +10,25 @@ public class ChangeSupport<T> {
 		this.source = source;
 	}
 
-	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
+	protected EventListenerList listenerList = new EventListenerList();
 
 	public void addChangeListener(ChangeListener l) {
-		listeners.add(l);
+		listenerList.add(ChangeListener.class, l);
 	}
 
 	public void removeChangeListener(ChangeListener l) {
-		listeners.remove(l);
+		listenerList.remove(ChangeListener.class, l);
 	}
 
 	public void fireChange() {
 		ChangeEvent e = new ChangeEvent(source);
-		for (ChangeListener l : listeners) {
+		for (ChangeListener l : getListeners()) {
 			l.change(e);
 		}
 	}
 
 	public ChangeListener[] getListeners() {
-		return listeners.toArray(new ChangeListener[0]);
+		return listenerList.getListeners(ChangeListener.class);
 	}
 
 }
