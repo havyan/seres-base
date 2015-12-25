@@ -113,14 +113,11 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 	}
 
 	protected Object convert2DynamicObject(String propertyName, Object target) {
-		Bean bean = null;
+		Object bean = null;
 		if (target instanceof Bean) {
-			bean = (Bean) target;
+			bean = target;
 		} else {
-			Object result = DynamicObjectFactory2.createDynamicObject(target);
-			if (result instanceof Bean) {
-				bean = (Bean) result;
-			}
+			bean = DynamicObjectFactory2.createDynamicObject(target);
 		}
 		return bean;
 	}
