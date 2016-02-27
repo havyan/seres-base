@@ -3,36 +3,40 @@
  */
 package com.framework.log;
 
-import java.util.Date;
-
 /**
  * @author HWYan
  *
  */
 public class Logger {
 
+	private static Log log = new DefaultLog();
+
+	public static void register(Log log) {
+		Logger.log = log;
+	}
+
 	public static void error(Throwable e) {
-		e.printStackTrace();
+		log.error(e);
 	}
 
 	public static void info(Exception e) {
-		System.out.println(new Date().toString() + "[Info]: " + e.getMessage());
+		log.info(e);
 	}
 
 	public static void info(String msg) {
-		System.out.println(new Date().toString() + "[Info]: " + msg);
+		log.info(msg);
 	}
 
 	public static void error(String msg) {
-
+		log.error(msg);
 	}
 
 	public static void warn(String msg) {
-
+		log.warn(msg);
 	}
 
 	public static void debug(String msg) {
-		System.out.println(new Date().toString() + "[Debug]: " + msg);
+		log.debug(msg);
 	}
 
 }
