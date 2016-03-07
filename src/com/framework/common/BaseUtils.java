@@ -4,6 +4,7 @@
 package com.framework.common;
 
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -78,6 +79,18 @@ public class BaseUtils {
 			Logger.error(e);
 		}
 		return null;
+	}
+
+	public static void bind(Object target, PropertyChangeListener l) {
+		if (target != null && target instanceof Bean) {
+			((Bean) target).addPropertyChangeListener(l);
+		}
+	}
+
+	public static void bind(Object target, String property, PropertyChangeListener l) {
+		if (target != null && target instanceof Bean) {
+			((Bean) target).addPropertyChangeListener(property, l);
+		}
 	}
 
 	public static Object deepClone(Object obj) {
