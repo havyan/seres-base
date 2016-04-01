@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 支持IO的工具类
  * 
  * @author yanhw
  * 
@@ -23,13 +22,7 @@ import java.util.Map;
 public class IOUtils {
 
 	/**
-	 * 生成字符串文件
 	 * 
-	 * @param path
-	 *            文件路径
-	 * @param target
-	 *            目标字符串
-	 * @return
 	 * @throws IOException
 	 */
 	public static String readStringFromFile(String path) throws IOException {
@@ -38,12 +31,6 @@ public class IOUtils {
 	}
 
 	/**
-	 * 生成字符串文件
-	 * 
-	 * @param path
-	 *            文件路径
-	 * @param target
-	 *            目标字符串
 	 * @return
 	 * @throws IOException
 	 */
@@ -51,7 +38,7 @@ public class IOUtils {
 		InputStream input = null;
 		String fileSql = null;
 		try {
-			byte[] fileBytes = new byte[(int) file.length()]; // 文件不可过大
+			byte[] fileBytes = new byte[(int) file.length()]; // 锟侥硷拷锟斤拷锟缴癸拷锟斤拷
 			input = new FileInputStream(file);
 			input.read(fileBytes);
 			fileSql = new String(fileBytes);
@@ -66,12 +53,6 @@ public class IOUtils {
 	}
 
 	/**
-	 * 生成字符串文件
-	 * 
-	 * @param path
-	 *            文件路径
-	 * @param target
-	 *            目标字符串
 	 * @return
 	 * @throws IOException
 	 */
@@ -83,12 +64,6 @@ public class IOUtils {
 	public static int SUBDIVSOR = 2000000;
 
 	/**
-	 * 生成字符串文件
-	 * 
-	 * @param path
-	 *            文件路径
-	 * @param target
-	 *            目标字符串
 	 * @return
 	 * @throws IOException
 	 */
@@ -161,7 +136,6 @@ public class IOUtils {
 	}
 	
 	/**
-	 * 文件不能超过1-2G
 	 * @param file
 	 * @param target
 	 * @throws IOException 
