@@ -59,10 +59,10 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 					break;
 				}
 			} catch (SecurityException e) {
-				Logger.error(e);
+				Logger.info(e.getMessage());
 				return null;
 			} catch (NoSuchMethodException e) {
-				Logger.info(e);
+				Logger.info(e.getMessage());
 			}
 		}
 
