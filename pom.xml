@@ -8,6 +8,15 @@
     <relativePath>../seres-all</relativePath>
   </parent>
   <build>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <!-- download source code in Eclipse, best practice -->
       <plugin>
