@@ -128,18 +128,24 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 					List<?> list = (List<?>) source;
 					int index = list.indexOf(bean);
 					if (index != -1) {
-						firePropertyChange(index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+						Object target = BaseUtils.getChangeTarget(e);
+						if (target != source) {
+							if (target == null) {
+								target = source;
+							}
+							firePropertyChange(target, index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+						}
 					}
 				}
 			});
 		}
 	}
 
-	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue) {
 		if (dynamicList != null) {
 			if (hasInterface(DynamicCollection.class)) {
 				DynamicCollection dynamicCollection = getInterfaceFieldValue(dynamicList, DynamicCollection.class);
-				dynamicCollection.firePropertyChange(propertyName, oldValue, newValue);
+				dynamicCollection.firePropertyChange(target, propertyName, oldValue, newValue);
 			}
 		}
 	}

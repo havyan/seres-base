@@ -7,6 +7,8 @@ public class Profile {
 	private int weight;
 
 	private String face;
+	
+	private Person person;
 
 	public Profile() {
 		super();
@@ -41,6 +43,14 @@ public class Profile {
 
 	public void setFace(String face) {
 		this.face = face;
+	}
+
+	public Person getPerson() {
+		return person;
+	}
+
+	public void setPerson(Person person) {
+		this.person = person;
 	}
 
 }

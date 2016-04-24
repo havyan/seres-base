@@ -43,7 +43,7 @@ public interface Bean extends DynamicObject {
 
 	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
 
-	public void firePropertyChange(String propertyName, Object oldValue, Object newValue);
+	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue);
 	
 	public void fireChange();
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.framework.common.BaseUtils;
 import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeEvent;
 import com.framework.events.PropertyChangeListenerProxy;
@@ -37,14 +38,14 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 					Object oldValue = entry.getValue();
 					Object newValue = ((Map<?, ?>) source).get(entry.getKey());
 					if (newValue != oldValue) {
-						firePropertyChange((String) entry.getKey(), oldValue, newValue);
+						firePropertyChange(source, (String) entry.getKey(), oldValue, newValue);
 					}
 				}
 			}
 			for (Map.Entry<?, ?> entry : ((Map<?, ?>) source).entrySet()) {
 				if (entry.getKey() instanceof String) {
 					if (!origin.containsKey(entry.getKey())) {
-						firePropertyChange((String) entry.getKey(), null, entry.getValue());
+						firePropertyChange(source, (String) entry.getKey(), null, entry.getValue());
 					}
 				}
 			}
@@ -95,7 +96,13 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 			if (!bean.hasPropertyChangeListenerFrom(this)) {
 				bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
 					public void propertyChange(PropertyChangeEvent e) {
-						firePropertyChange(propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+						Object target = BaseUtils.getChangeTarget(e);
+						if (target != source) {
+							if (target == null) {
+								target = source;
+							}
+							firePropertyChange(target, propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+						}
 					}
 				});
 			}
@@ -104,7 +111,7 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 				if (!dynamicCollection.hasChangeListenerFrom(this)) {
 					dynamicCollection.addChangeListener(new ChangeAdapter(this) {
 						public void change(ChangeEvent e) {
-							firePropertyChange(propertyName, null, e.getSource());
+							firePropertyChange(source, propertyName, null, e.getSource());
 						}
 					});
 				}
@@ -122,11 +129,11 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 		return bean;
 	}
 
-	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue) {
 		if (dynamicMap != null) {
 			if (hasInterface(DynamicMap.class)) {
 				DynamicMap dynamicMapCallback = getInterfaceFieldValue(dynamicMap, DynamicMap.class);
-				dynamicMapCallback.firePropertyChange(propertyName, oldValue, newValue);
+				dynamicMapCallback.firePropertyChange(target, propertyName, oldValue, newValue);
 			}
 		}
 	}

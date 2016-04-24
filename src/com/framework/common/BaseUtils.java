@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ClassUtils;
 
+import com.framework.events.AdvancedPropertyChangeEvent;
 import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.interfaces.Bean;
@@ -190,6 +191,14 @@ public class BaseUtils {
 			}
 			sourceBean.removeAllPropertyChangeListenerFrom(from);
 		}
+	}
+
+	public static Object getChangeTarget(PropertyChangeEvent e) {
+		Object target = null;
+		if (e instanceof AdvancedPropertyChangeEvent) {
+			target = ((AdvancedPropertyChangeEvent) e).getTarget();
+		}
+		return target;
 	}
 
 	public static Object newInstance(String className) {

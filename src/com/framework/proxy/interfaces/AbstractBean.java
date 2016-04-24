@@ -9,14 +9,14 @@ import java.util.stream.Stream;
 
 import com.framework.common.BaseUtils;
 import com.framework.events.PropertyChangeListenerProxy;
-import com.framework.events.PropertyChangeSupportAdapter;
+import com.framework.events.AdvancedPropertyChangeSupport;
 import com.framework.log.Logger;
 
 public abstract class AbstractBean<T> implements Bean {
 
 	protected T source;
 
-	protected transient PropertyChangeSupportAdapter changeSupport = new PropertyChangeSupportAdapter(this);
+	protected transient AdvancedPropertyChangeSupport changeSupport = new AdvancedPropertyChangeSupport(this);
 
 	protected List<PropertyChangeListenerProxy> propertyChangeListenerProxies;
 
@@ -89,9 +89,9 @@ public abstract class AbstractBean<T> implements Bean {
 		return changeSupport.getPropertyChangeListeners(propertyName);
 	}
 
-	public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue) {
 		Logger.debug("Property [" + propertyName + "] Changed to " + newValue);
-		changeSupport.firePropertyChange(propertyName, oldValue, newValue);
+		changeSupport.firePropertyChange(target, propertyName, oldValue, newValue);
 	}
 
 	public void fireChange() {

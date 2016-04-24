@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PropertyChangeSupportAdapter extends PropertyChangeSupport {
+public class AdvancedPropertyChangeSupport extends PropertyChangeSupport {
 
 	private Set<String> propertyNames = new HashSet<String>();
 
-	public PropertyChangeSupportAdapter(Object sourceBean) {
+	private Object sourceBean;
+
+	public AdvancedPropertyChangeSupport(Object sourceBean) {
 		super(sourceBean);
+		this.sourceBean = sourceBean;
 	}
 
 	public void removeAllPropertyChangeListenerFrom(Object from) {
@@ -93,6 +96,12 @@ public class PropertyChangeSupportAdapter extends PropertyChangeSupport {
 		super.removePropertyChangeListener(propertyName, listener);
 		if (!hasListeners(propertyName)) {
 			propertyNames.remove(propertyName);
+		}
+	}
+
+	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue) {
+		if (oldValue == null || newValue == null || !oldValue.equals(newValue)) {
+			firePropertyChange(new AdvancedPropertyChangeEvent(target, this.sourceBean, propertyName, oldValue, newValue));
 		}
 	}
 
