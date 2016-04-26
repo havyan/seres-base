@@ -94,8 +94,9 @@ public class BaseUtils {
 		}
 	}
 
-	public static Object deepClone(Object obj) {
-		Object cloneObject = null;
+	@SuppressWarnings("unchecked")
+	public static <T> T deepClone(T obj) {
+		T cloneObject = null;
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -104,7 +105,7 @@ public class BaseUtils {
 
 			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
 			ObjectInputStream ois = new ObjectInputStream(bis);
-			cloneObject = ois.readObject();
+			cloneObject = (T) ois.readObject();
 			ois.close();
 
 		} catch (IOException e) {
