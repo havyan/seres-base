@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -196,7 +197,7 @@ public class BaseUtils {
 	}
 
 	public static List<Object> getChain(PropertyChangeEvent e) {
-		List<Object> chain = null;
+		List<Object> chain = new ArrayList<Object>();
 		if (e instanceof AdvancedPropertyChangeEvent) {
 			chain = ((AdvancedPropertyChangeEvent) e).getChain();
 		}
