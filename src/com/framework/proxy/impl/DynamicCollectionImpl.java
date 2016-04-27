@@ -15,8 +15,7 @@ public class DynamicCollectionImpl extends AbstractBean<Collection<?>> implement
 	private Object[] origin;
 
 	public DynamicCollectionImpl(Collection<?> source) {
-		super();
-		this.source = source;
+		super(source);
 		this.origin = source.toArray();
 		this.changeSupport = new ChangeSupport<Collection<?>>(source);
 	}

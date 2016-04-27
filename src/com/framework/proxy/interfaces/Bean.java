@@ -4,6 +4,7 @@
 package com.framework.proxy.interfaces;
 
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.Map;
 
 import com.framework.events.PropertyChangeListenerProxy;
@@ -43,7 +44,7 @@ public interface Bean extends DynamicObject {
 
 	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
 
-	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue);
+	public void firePropertyChange(List<Object> chain, String propertyName, Object oldValue, Object newValue);
 	
 	public void fireChange();
 

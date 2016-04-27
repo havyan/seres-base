@@ -99,9 +99,9 @@ public class AdvancedPropertyChangeSupport extends PropertyChangeSupport {
 		}
 	}
 
-	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue) {
+	public void firePropertyChange(List<Object> chain, String propertyName, Object oldValue, Object newValue) {
 		if (oldValue == null || newValue == null || !oldValue.equals(newValue)) {
-			firePropertyChange(new AdvancedPropertyChangeEvent(target, this.sourceBean, propertyName, oldValue, newValue));
+			firePropertyChange(new AdvancedPropertyChangeEvent(chain, this.sourceBean, propertyName, oldValue, newValue));
 		}
 	}
 

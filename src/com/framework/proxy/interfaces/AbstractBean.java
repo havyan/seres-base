@@ -16,9 +16,16 @@ public abstract class AbstractBean<T> implements Bean {
 
 	protected T source;
 
-	protected transient AdvancedPropertyChangeSupport changeSupport = new AdvancedPropertyChangeSupport(this);
+	protected transient AdvancedPropertyChangeSupport changeSupport;
 
 	protected List<PropertyChangeListenerProxy> propertyChangeListenerProxies;
+
+	public AbstractBean(T source) {
+		this.source = source;
+		if (source != null) {
+			changeSupport = new AdvancedPropertyChangeSupport(source);
+		}
+	}
 
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
 		changeSupport.addPropertyChangeListener(l);
@@ -89,9 +96,9 @@ public abstract class AbstractBean<T> implements Bean {
 		return changeSupport.getPropertyChangeListeners(propertyName);
 	}
 
-	public void firePropertyChange(Object target, String propertyName, Object oldValue, Object newValue) {
+	public void firePropertyChange(List<Object> chain, String propertyName, Object oldValue, Object newValue) {
 		Logger.debug("Property [" + propertyName + "] Changed to " + newValue);
-		changeSupport.firePropertyChange(target, propertyName, oldValue, newValue);
+		changeSupport.firePropertyChange(chain, propertyName, oldValue, newValue);
 	}
 
 	public void fireChange() {

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -194,12 +195,12 @@ public class BaseUtils {
 		}
 	}
 
-	public static Object getChangeTarget(PropertyChangeEvent e) {
-		Object target = null;
+	public static List<Object> getChain(PropertyChangeEvent e) {
+		List<Object> chain = null;
 		if (e instanceof AdvancedPropertyChangeEvent) {
-			target = ((AdvancedPropertyChangeEvent) e).getTarget();
+			chain = ((AdvancedPropertyChangeEvent) e).getChain();
 		}
-		return target;
+		return chain;
 	}
 
 	public static Object newInstance(String className) {

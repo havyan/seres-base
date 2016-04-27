@@ -1,22 +1,31 @@
 package com.framework.events;
 
 import java.beans.PropertyChangeEvent;
+import java.util.LinkedList;
+import java.util.List;
 
 public class AdvancedPropertyChangeEvent extends PropertyChangeEvent {
 
-	private Object target;
+	private List<Object> chain = new LinkedList<Object>();
 
-	public AdvancedPropertyChangeEvent(Object target, Object source, String propertyName, Object oldValue, Object newValue) {
+	public AdvancedPropertyChangeEvent(List<Object> chain, Object source, String propertyName, Object oldValue, Object newValue) {
 		super(source, propertyName, oldValue, newValue);
-		this.target = target;
+		if (chain != null) {
+			this.chain.addAll(chain);
+		}
+		this.chain.add(source);
 	}
 
-	public Object getTarget() {
-		return target;
+	public boolean contains(Object target) {
+		return chain.contains(target);
 	}
 
-	public void setTarget(Object target) {
-		this.target = target;
+	public List<Object> getChain() {
+		return chain;
+	}
+
+	public void setChain(List<Object> chain) {
+		this.chain = chain;
 	}
 
 }

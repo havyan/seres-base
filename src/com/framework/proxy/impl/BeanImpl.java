@@ -32,11 +32,11 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 	private Map<String, Bean> complexes = new HashMap<String, Bean>();
 
 	public BeanImpl() {
-
+		this(null);
 	}
 
 	public BeanImpl(Object source) {
-		this.source = source;
+		super(source);
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 				BaseUtils.setProperty(source, propertyName, value);
 				changes.add(propertyName);
 				complexes.remove(propertyName);
-				firePropertyChange(source, propertyName, current, value);
+				firePropertyChange(null, propertyName, current, value);
 			}
 		}
 		Logger.debug("end set propety name @" + propertyName);
@@ -85,7 +85,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			if (!dynamicCollection.hasChangeListenerFrom(this)) {
 				dynamicCollection.addChangeListener(new ChangeAdapter(this) {
 					public void change(ChangeEvent e) {
-						firePropertyChange(BeanImpl.this.source, propertyName, null, e.getSource());
+						firePropertyChange(null, propertyName, null, e.getSource());
 					}
 				});
 			}
@@ -93,12 +93,9 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 		if (!bean.hasPropertyChangeListenerFrom(this)) {
 			bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
 				public void propertyChange(PropertyChangeEvent e) {
-					Object target = BaseUtils.getChangeTarget(e);
-					if (target != BeanImpl.this.source) {
-						if (target == null) {
-							target = BeanImpl.this.source;
-						}
-						firePropertyChange(target, propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+					List<Object> chain = BaseUtils.getChain(e);
+					if (!chain.contains(BeanImpl.this.source)) {
+						firePropertyChange(chain, propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
 					}
 				}
 			});
