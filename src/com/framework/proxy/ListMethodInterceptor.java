@@ -5,10 +5,15 @@ package com.framework.proxy;
 
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.framework.common.BaseUtils;
+import com.framework.events.ChangeAdapter;
+import com.framework.events.ChangeEvent;
 import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.interfaces.Bean;
@@ -38,6 +43,7 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 		Object result = proxy.invoke(source, convertArgs(args));
 		if (isDifferent(origin, list)) {
 			Logger.debug("List changed");
+			handleRemoved(origin, list);
 			check();
 			if (hasInterface(DynamicCollection.class)) {
 				DynamicCollection dynamicCollection = getInterfaceFieldValue(dynamicObject, DynamicCollection.class);
@@ -122,19 +128,33 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 	}
 
 	protected void bindBean(Bean bean) {
-		if (bean != null && !bean.hasPropertyChangeListenerFrom(this)) {
-			bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
-				public void propertyChange(PropertyChangeEvent e) {
-					List<?> list = (List<?>) source;
-					int index = list.indexOf(bean);
-					if (index != -1) {
-						List<Object> chain = BaseUtils.getChain(e);
-						if (!chain.contains(source)) {
-							firePropertyChange(chain, index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+		if (bean != null) {
+			if (bean instanceof DynamicCollection) {
+				DynamicCollection dynamicCollection = (DynamicCollection) bean;
+				if (!dynamicCollection.hasChangeListenerFrom(this)) {
+					dynamicCollection.addChangeListener(new ChangeAdapter(this) {
+						public void change(ChangeEvent e) {
+							List<?> list = (List<?>) source;
+							int index = list.indexOf(bean);
+							firePropertyChange(null, index + "", null, e.getSource());
+						}
+					});
+				}
+			}
+			if (!bean.hasPropertyChangeListenerFrom(this)) {
+				bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
+					public void propertyChange(PropertyChangeEvent e) {
+						List<?> list = (List<?>) source;
+						int index = list.indexOf(bean);
+						if (index != -1) {
+							List<Object> chain = BaseUtils.getChain(e);
+							if (!chain.contains(source)) {
+								firePropertyChange(chain, index + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+							}
 						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 
@@ -158,5 +178,29 @@ public class ListMethodInterceptor extends DynamicMethodInterceptor {
 			}
 		}
 		return false;
+	}
+	
+	protected void handleRemoved(Object[] array, List<?> list) {
+		List<Object> removed = findRemoved(array, list);
+		for(Object e : removed) {
+			if(e != null && e instanceof Bean) {
+				if (e instanceof DynamicCollection) {
+					((DynamicCollection) e).removeChangeListenerByFrom(this);
+				}
+				((Bean)e).removeAllPropertyChangeListenerFrom(this);
+			}
+		}
+	}
+	
+	protected List<Object> findRemoved(Object[] array, List<?> list) {
+		List<Object> removed = new ArrayList<Object>();
+		if(ArrayUtils.isNotEmpty(array) && list != null) {
+			for(Object e : array) {
+				if(!list.contains(e)) {
+					removed.add(e);
+				}
+			}
+		}
+		return removed;
 	}
 }

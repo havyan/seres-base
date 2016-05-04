@@ -47,7 +47,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			if ((current != null && value != null && !current.equals(value)) || current != value) {
 				BaseUtils.setProperty(source, propertyName, value);
 				changes.add(propertyName);
-				complexes.remove(propertyName);
+				removeBean(propertyName);
 				firePropertyChange(null, propertyName, current, value);
 			}
 		}
@@ -71,6 +71,17 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 			}
 		}
 		return null;
+	}
+	
+	protected void removeBean(String propertyName) {
+		Bean bean = complexes.remove(propertyName);
+		if (bean != null) {
+			if (bean instanceof DynamicCollection) {
+				DynamicCollection dynamicCollection = (DynamicCollection) bean;
+				dynamicCollection.removeChangeListenerByFrom(this);
+			}
+			bean.removeAllPropertyChangeListenerFrom(this);
+		}
 	}
 
 	protected Bean createBean(String propertyName, Object value) {

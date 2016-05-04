@@ -39,6 +39,9 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 					Object oldValue = entry.getValue();
 					Object newValue = ((Map<?, ?>) source).get(entry.getKey());
 					if (newValue != oldValue) {
+						if (newValue == null) {
+							handleRemoved(oldValue);
+						}
 						firePropertyChange(null, (String) entry.getKey(), oldValue, newValue);
 					}
 				}
@@ -133,6 +136,15 @@ public class MapMethodInterceptor extends DynamicMethodInterceptor {
 				DynamicMap dynamicMapCallback = getInterfaceFieldValue(dynamicMap, DynamicMap.class);
 				dynamicMapCallback.firePropertyChange(chain, propertyName, oldValue, newValue);
 			}
+		}
+	}
+	
+	protected void handleRemoved(Object removed) {
+		if(removed != null && removed instanceof Bean) {
+			if (removed instanceof DynamicCollection) {
+				((DynamicCollection) removed).removeChangeListenerByFrom(this);
+			}
+			((Bean)removed).removeAllPropertyChangeListenerFrom(this);
 		}
 	}
 
