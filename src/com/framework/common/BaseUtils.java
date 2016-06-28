@@ -6,13 +6,9 @@ package com.framework.common;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -42,6 +38,7 @@ import com.framework.events.AdvancedPropertyChangeEvent;
 import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.interfaces.Bean;
+import com.rits.cloning.Cloner;
 
 /**
  * @author HWYan
@@ -98,24 +95,14 @@ public class BaseUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T deepClone(T obj) {
-		T cloneObject = null;
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(obj);
-			oos.close();
-
-			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			cloneObject = (T) ois.readObject();
-			ois.close();
-
-		} catch (IOException e) {
-			Logger.error(e);
-		} catch (ClassNotFoundException e) {
-			Logger.error(e);
+		T target = null;
+		if (obj instanceof Bean) {
+			target = (T) ((Bean)obj).cloneSource();
+		} else {
+			Cloner cloner = new Cloner();
+			target = cloner.deepClone(obj);
 		}
-		return cloneObject;
+		return target;
 	}
 
 	public static void setFieldValue(Object target, String fieldName, Object value) {
