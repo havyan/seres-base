@@ -47,5 +47,7 @@ public interface Bean extends DynamicObject {
 	public void firePropertyChange(List<Object> chain, String propertyName, Object oldValue, Object newValue);
 	
 	public void fireChange();
+	
+	public Object cloneSource();
 
 }

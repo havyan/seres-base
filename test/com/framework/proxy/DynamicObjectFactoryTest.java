@@ -104,5 +104,28 @@ public class DynamicObjectFactoryTest extends TestCase {
 		assertTrue(list.indexOf(person1) == 0);
 		assertTrue(list.indexOf(person2) == 1);
 	}
+	
+	public void testCloneSource() {
+		Person person1 = new Person("Haowei", 31);
+		List<Profile> profiles = new ArrayList<Profile>();
+		Profile profile1 = new Profile("a", 170, 140);
+		Profile profile2 = new Profile("b", 170, 140);
+		Profile profile3 = new Profile("c", 170, 140);
+		Profile profile4 = new Profile("d", 170, 140);
+		profiles.add(profile1);
+		profiles.add(profile2);
+		profiles.add(profile3);
+		profiles.add(profile4);
+		person1.setProfiles(profiles);
+		
+		Person bean = DynamicObjectFactory2.createDynamicBeanObject(person1);
+		Profile profile5 = new Profile("2", 170, 140);
+		bean.getProfiles().add(profile5);
+		Person person2 = (Person)(((Bean) bean).cloneSource());
+		assertTrue(!(person2 instanceof Bean));
+		assertTrue(person2.getProfiles().size() == 5);
+		assertTrue(person1.getProfiles().get(0) != person2.getProfiles().get(0));
+		assertTrue(!(person2.getProfiles().get(4) instanceof Bean));
+	}
 
 }

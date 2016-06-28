@@ -2,11 +2,14 @@ package com.framework.proxy.impl;
 
 import java.util.Collection;
 
+import com.framework.common.BaseUtils;
 import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeListener;
 import com.framework.events.ChangeSupport;
 import com.framework.proxy.interfaces.AbstractBean;
+import com.framework.proxy.interfaces.Bean;
 import com.framework.proxy.interfaces.DynamicCollection;
+import com.rits.cloning.Cloner;
 
 public class DynamicCollectionImpl extends AbstractBean<Collection<?>> implements DynamicCollection {
 
@@ -69,6 +72,21 @@ public class DynamicCollectionImpl extends AbstractBean<Collection<?>> implement
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public Object cloneSource() {
+		Cloner cloner = new Cloner();
+		Collection target = (Collection) BaseUtils.newInstance(this.getSource().getClass());
+		for (Object e: this.getSource()) {
+			if (e instanceof Bean) {
+				target.add(((Bean)e).cloneSource());
+			} else {
+				target.add(cloner.deepClone(e));
+			}
+		}
+		return target;
 	}
 
 }
