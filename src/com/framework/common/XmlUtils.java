@@ -1,7 +1,10 @@
 package com.framework.common;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 
 import org.jdom2.Document;
@@ -47,7 +50,7 @@ public class XmlUtils {
 	public static void write(Document doc, File file) {
 		try {
 			XMLOutputter xmlopt = new XMLOutputter();
-			FileWriter writer = new FileWriter(file);
+			Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "utf-8"));
 			Format fm = Format.getPrettyFormat();
 			xmlopt.setFormat(fm);
 			xmlopt.output(doc, writer);
