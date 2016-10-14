@@ -57,6 +57,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 				if (bean != null) {
 					addBean(propertyName, bean);
 				}
+				value = BaseUtils.getProperty(source, propertyName);
 				firePropertyChange(null, propertyName, current, value);
 			}
 		}
