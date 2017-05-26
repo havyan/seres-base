@@ -3,18 +3,21 @@ package com.framework.proxy.interfaces;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import com.framework.common.BaseUtils;
-import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.events.AdvancedPropertyChangeSupport;
 import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeEvent;
+import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.DynamicObjectFactory2;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class AbstractBean<T> implements Bean {
 
 	protected T source;
@@ -122,7 +125,6 @@ public abstract class AbstractBean<T> implements Bean {
 		return source;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setSource(Object source) {
 		this.source = (T) source;
 	}
@@ -154,6 +156,59 @@ public abstract class AbstractBean<T> implements Bean {
 				});
 			}
 		}
+	}
+	
+	protected int findIndex(Object[] array, Object o) {
+		for (int i = 0; i < array.length; i++) {
+			Object e = array[i];
+			if (o == e || (o != null && o.equals(e)) || (e != null && e.equals(o))) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	protected Object[] convertArgs(Object[] args, Object[] array) {
+		Object[] newArgs = new Object[args.length];
+		for (int i = 0; i < args.length; i++) {
+			newArgs[i] = convertArg(args[i], array);
+		}
+		return newArgs;
+	}
+
+	protected Object convertArg(Object arg, Object[] array) {
+		if (Collection.class.isInstance(arg)) {
+			return convertCollectionArg((Collection) arg, array);
+		} else if (Map.class.isInstance(arg)) {
+			return convertMapArg((Map) arg, array);
+		} else {
+			return convertSimpleArg(arg, array);
+		}
+	}
+
+	protected Object convertCollectionArg(Collection arg, Object[] array) {
+		Collection newArg = (Collection) BaseUtils.newInstance(arg.getClass());
+		for (Object e : arg) {
+			newArg.add(convertSimpleArg(e, array));
+		}
+		return newArg;
+	}
+	
+	protected Object convertMapArg(Map arg, Object[] array) {
+		Map newArg = (Map) BaseUtils.newInstance(arg.getClass());
+		for (Object e : arg.entrySet()) {
+			Map.Entry entry = (Entry) e;
+			newArg.put(entry.getKey(), convertSimpleArg(entry.getValue(), array));
+		}
+		return newArg;
+	}
+
+	protected Object convertSimpleArg(Object arg, Object[] array) {
+		int index = this.findIndex(array, arg);
+		if (index >= 0) {
+			return array[index];
+		}
+		return arg;
 	}
 
 }
