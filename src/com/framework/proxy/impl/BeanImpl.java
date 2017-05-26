@@ -3,7 +3,6 @@
  */
 package com.framework.proxy.impl;
 
-import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,10 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.framework.common.BaseUtils;
-import com.framework.events.ChangeAdapter;
 import com.framework.events.ChangeEvent;
 import com.framework.events.ChangeListener;
-import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.log.Logger;
 import com.framework.proxy.DynamicObjectFactory2;
 import com.framework.proxy.interfaces.AbstractBean;
@@ -80,7 +77,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 		}
 		return null;
 	}
-	
+
 	protected void removeBean(String propertyName) {
 		Bean bean = complexes.remove(propertyName);
 		if (bean != null) {
@@ -99,26 +96,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 		} else {
 			bean = (Bean) DynamicObjectFactory2.createDynamicObject(value);
 		}
-		if (bean instanceof DynamicCollection) {
-			DynamicCollection dynamicCollection = (DynamicCollection) bean;
-			if (!dynamicCollection.hasChangeListenerFrom(this)) {
-				dynamicCollection.addChangeListener(new ChangeAdapter(this) {
-					public void change(ChangeEvent e) {
-						firePropertyChange(null, propertyName, null, e.getSource());
-					}
-				});
-			}
-		}
-		if (!bean.hasPropertyChangeListenerFrom(this)) {
-			bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
-				public void propertyChange(PropertyChangeEvent e) {
-					List<Object> chain = BaseUtils.getChain(e);
-					if (!chain.contains(BeanImpl.this.source)) {
-						firePropertyChange(chain, propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
-					}
-				}
-			});
-		}
+		this.bindBean(propertyName, bean);
 		complexes.put(propertyName, bean);
 		return bean;
 	}
@@ -145,11 +123,11 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 	public Object cloneSource() {
 		Cloner cloner = new Cloner();
 		Object target = cloner.shallowClone(this.source);
-		for (Map.Entry<String, Bean> entry: this.complexes.entrySet()) {
+		for (Map.Entry<String, Bean> entry : this.complexes.entrySet()) {
 			BaseUtils.setProperty(target, entry.getKey(), null);
 		}
 		target = cloner.deepClone(target);
-		for (Map.Entry<String, Bean> entry: this.complexes.entrySet()) {
+		for (Map.Entry<String, Bean> entry : this.complexes.entrySet()) {
 			BaseUtils.setProperty(target, entry.getKey(), entry.getValue().cloneSource());
 		}
 		return target;
