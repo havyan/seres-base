@@ -4,7 +4,9 @@
 package com.framework.proxy.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -37,6 +39,15 @@ public class Test {
 		System.out.println(ArrayList.class.isAssignableFrom(List.class));
 		System.out.println(BeanUtils.class.getResource("").getPath());
 		System.out.println(JButton.class.isAssignableFrom(JComponent.class));
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map = DynamicObjectFactory2.createDynamicObject(map);
+		((Bean)map).addPropertyChangeListener(e -> {
+			System.out.println(e.getPropertyName() + " changed from " + e.getOldValue() + " to " + e.getNewValue());
+		});
+		map.put("name", "haowei");
+		map.put("age", 32);
+		map.remove("name");
 	}
 
 }

@@ -103,9 +103,12 @@ public class DynamicMapImpl extends AbstractBean<Map> implements DynamicMap {
 		proxy = (Map) BaseUtils.newInstance(this.source.getClass());
 		for (Object e : source.entrySet()) {
 			Map.Entry entry = (Entry) e;
-			Object result = convert2DynamicObject(entry.getValue());
-			if (result instanceof Bean) {
-				bindBean(entry.getKey().toString(), (Bean) result);
+			Object result = null;
+			if (entry.getValue() != null) {
+				result = convert2DynamicObject(entry.getValue());
+				if (result instanceof Bean) {
+					bindBean(entry.getKey().toString(), (Bean) result);
+				}
 			}
 			proxy.put(entry.getKey(), result);
 		}

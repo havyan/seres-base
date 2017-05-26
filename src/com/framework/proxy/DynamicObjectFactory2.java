@@ -90,6 +90,9 @@ public class DynamicObjectFactory2 {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T createDynamicObject(T target) {
+		if (target == null) {
+			return null;
+		}
 		if (target instanceof Bean || (target.getClass().isPrimitive() && Modifier.isFinal(target.getClass().getModifiers()))) {
 			return target;
 		} else {
