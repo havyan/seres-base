@@ -10,7 +10,10 @@ import java.util.stream.Stream;
 import com.framework.common.BaseUtils;
 import com.framework.events.PropertyChangeListenerProxy;
 import com.framework.events.AdvancedPropertyChangeSupport;
+import com.framework.events.ChangeAdapter;
+import com.framework.events.ChangeEvent;
 import com.framework.log.Logger;
+import com.framework.proxy.DynamicObjectFactory2;
 
 public abstract class AbstractBean<T> implements Bean {
 
@@ -122,6 +125,35 @@ public abstract class AbstractBean<T> implements Bean {
 	@SuppressWarnings("unchecked")
 	public void setSource(Object source) {
 		this.source = (T) source;
+	}
+
+	protected Object convert2DynamicObject(Object target) {
+		return DynamicObjectFactory2.createDynamicObject(target);
+	}
+
+	protected void bindBean(String propertyName, Bean bean) {
+		if (bean != null) {
+			if (bean instanceof DynamicCollection) {
+				DynamicCollection dynamicCollection = (DynamicCollection) bean;
+				if (!dynamicCollection.hasChangeListenerFrom(this)) {
+					dynamicCollection.addChangeListener(new ChangeAdapter(this) {
+						public void change(ChangeEvent e) {
+							firePropertyChange(null, propertyName, null, e.getSource());
+						}
+					});
+				}
+			}
+			if (!bean.hasPropertyChangeListenerFrom(this)) {
+				bean.addPropertyChangeListener(new PropertyChangeListenerProxy(this) {
+					public void propertyChange(PropertyChangeEvent e) {
+						List<Object> chain = BaseUtils.getChain(e);
+						if (!chain.contains(source)) {
+							firePropertyChange(chain, propertyName + "." + e.getPropertyName(), e.getOldValue(), e.getNewValue());
+						}
+					}
+				});
+			}
+		}
 	}
 
 }
