@@ -171,12 +171,17 @@ public class BaseUtils {
 	}
 
 	public static boolean hasMethod(Object target, String name, Class<?>... parameterTypes) {
-		try {
-			return target.getClass().getDeclaredMethod(name, parameterTypes) != null;
-		} catch (Exception e) {
-			Logger.info(e);
-			return false;
+		Class<?> cls = target.getClass();
+		Method method = null;
+		while (cls != Object.class && method == null) {
+			try {
+				method = cls.getDeclaredMethod(name, parameterTypes);
+			} catch (Exception e) {
+				Logger.debug(name + " is not found in " + cls.getName());
+			}
+			cls = cls.getSuperclass();
 		}
+		return method != null;
 	}
 
 	public static void takeBinds(Object source, Object dest, Object from) {
