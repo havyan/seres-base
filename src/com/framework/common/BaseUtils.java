@@ -97,7 +97,7 @@ public class BaseUtils {
 	public static <T> T deepClone(T obj) {
 		T target = null;
 		if (obj instanceof Bean) {
-			target = (T) ((Bean)obj).cloneSource();
+			target = (T) ((Bean) obj).cloneSource();
 		} else {
 			Cloner cloner = new Cloner();
 			target = cloner.deepClone(obj);
@@ -106,11 +106,15 @@ public class BaseUtils {
 	}
 
 	public static void setFieldValue(Object target, String fieldName, Object value) {
+		Class<?> cls = target.getClass();
 		Field field = null;
-		try {
-			field = target.getClass().getDeclaredField(fieldName);
-		} catch (Exception e) {
-			Logger.error(e);
+		while (cls != Object.class && field == null) {
+			try {
+				field = cls.getDeclaredField(fieldName);
+			} catch (Exception e) {
+				Logger.debug(fieldName + " is not found in " + cls.getName());
+			}
+			cls = cls.getSuperclass();
 		}
 		if (field != null) {
 			field.setAccessible(true);
@@ -131,20 +135,37 @@ public class BaseUtils {
 	}
 
 	public static boolean hasField(Object target, String fieldName) {
-		try {
-			return target.getClass().getDeclaredField(fieldName) != null;
-		} catch (Exception e) {
-			return false;
+		Class<?> cls = target.getClass();
+		Field field = null;
+		while (cls != Object.class && field == null) {
+			try {
+				field = cls.getDeclaredField(fieldName);
+			} catch (Exception e) {
+				Logger.debug(fieldName + " is not found in " + cls.getName());
+			}
+			cls = cls.getSuperclass();
 		}
+		return field != null;
 	}
 
 	public static Object getFieldValue(Object target, String fieldName) {
-		try {
-			Field field = target.getClass().getDeclaredField(fieldName);
+		Class<?> cls = target.getClass();
+		Field field = null;
+		while (cls != Object.class && field == null) {
+			try {
+				field = cls.getDeclaredField(fieldName);
+			} catch (Exception e) {
+				Logger.debug(fieldName + " is not found in " + cls.getName());
+			}
+			cls = cls.getSuperclass();
+		}
+		if (field != null) {
 			field.setAccessible(true);
-			return field.get(target);
-		} catch (Exception e) {
-			Logger.error(e);
+			try {
+				return field.get(target);
+			} catch (Exception e) {
+				Logger.error(e);
+			}
 		}
 		return null;
 	}
