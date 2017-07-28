@@ -82,7 +82,7 @@ public class DynamicObjectFactory2 {
 		DynamicObject[] impls = new DynamicObject[implClasses.length];
 		for (int i = 0; i < impls.length; i++) {
 			impls[i] = (DynamicObject) BaseUtils.newInstance(implClasses[i]);
-			impls[i].setSource(target);
+			impls[i].source(target);
 		}
 
 		return createDynamicObject(target, methodInterceptor, interfaces, impls);

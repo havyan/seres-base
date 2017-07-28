@@ -74,7 +74,7 @@ public class DynamicMapImpl extends AbstractBean<Map> implements DynamicMap {
 			Object value = entry.getValue();
 			Object sourceValue = value;
 			if (value instanceof Bean) {
-				sourceValue = ((Bean) value).getSource();
+				sourceValue = ((Bean) value).source();
 			} else {
 				value = this.convert2DynamicObject(value);
 				entry.setValue(value);
@@ -116,15 +116,15 @@ public class DynamicMapImpl extends AbstractBean<Map> implements DynamicMap {
 	}
 
 	@Override
-	public boolean isChanged() {
+	public boolean changed() {
 		return changed;
 	}
 
 	@Override
 	public Object cloneSource() {
 		Cloner cloner = new Cloner();
-		Map target = (Map) BaseUtils.newInstance(this.getSource().getClass());
-		for (Object e : this.getSource().entrySet()) {
+		Map target = (Map) BaseUtils.newInstance(this.source().getClass());
+		for (Object e : this.source().entrySet()) {
 			Map.Entry entry = (Entry) e;
 			if (entry.getValue() instanceof Bean) {
 				target.put(entry.getKey(), ((Bean) entry.getValue()).cloneSource());

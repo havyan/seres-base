@@ -121,11 +121,11 @@ public abstract class AbstractBean<T> implements Bean {
 		return BaseUtils.getProperty(source, propertyName);
 	}
 
-	public T getSource() {
+	public T source() {
 		return source;
 	}
 
-	public void setSource(Object source) {
+	public void source(Object source) {
 		this.source = (T) source;
 	}
 

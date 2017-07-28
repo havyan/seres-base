@@ -72,7 +72,7 @@ public class DynamicCollectionImpl extends AbstractBean<Collection> implements D
 			Object proxyElement = proxyArray[i];
 			Object sourceElement = proxyElement;
 			if (proxyElement instanceof Bean) {
-				sourceElement = ((Bean) proxyElement).getSource();
+				sourceElement = ((Bean) proxyElement).source();
 			} else {
 				proxyElement = this.convert2DynamicObject(proxyElement);
 			}
@@ -173,15 +173,15 @@ public class DynamicCollectionImpl extends AbstractBean<Collection> implements D
 	}
 
 	@Override
-	public boolean isChanged() {
+	public boolean changed() {
 		return changed;
 	}
 
 	@Override
 	public Object cloneSource() {
 		Cloner cloner = new Cloner();
-		Collection target = (Collection) BaseUtils.newInstance(this.getSource().getClass());
-		for (Object e : this.getSource()) {
+		Collection target = (Collection) BaseUtils.newInstance(this.source().getClass());
+		for (Object e : this.source()) {
 			if (e instanceof Bean) {
 				target.add(((Bean) e).cloneSource());
 			} else {

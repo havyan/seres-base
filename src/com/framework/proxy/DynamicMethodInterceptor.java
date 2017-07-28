@@ -101,10 +101,10 @@ public class DynamicMethodInterceptor implements MethodInterceptor {
 
 	protected boolean invokeEquals(Object src, Object dest) {
 		if (src != null && src instanceof DynamicObject) {
-			src = ((DynamicObject) src).getSource();
+			src = ((DynamicObject) src).source();
 		}
 		if (dest != null && dest instanceof DynamicObject) {
-			dest = ((DynamicObject) dest).getSource();
+			dest = ((DynamicObject) dest).source();
 		}
 		return src.equals(dest);
 	}

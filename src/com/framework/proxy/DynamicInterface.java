@@ -4,8 +4,8 @@ import net.sf.cglib.proxy.NoOp;
 
 public interface DynamicInterface extends NoOp {
 
-	public Object getSource();
+	public Object source();
 
-	public void setSource(Object source);
+	public void source(Object source);
 
 }

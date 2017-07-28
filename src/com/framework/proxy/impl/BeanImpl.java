@@ -46,7 +46,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 				Bean bean = null;
 				if (value instanceof Bean) {
 					bean = (Bean) value;
-					value = bean.getSource();
+					value = bean.source();
 				}
 				BaseUtils.setProperty(source, propertyName, value);
 				changes.add(propertyName);
@@ -66,7 +66,7 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 		if (source != null) {
 			Object value = BaseUtils.getProperty(source, propertyName);
 			Bean complex = complexes.get(propertyName);
-			if (complex != null && complex.getSource() == value) {
+			if (complex != null && complex.source() == value) {
 				return complex;
 			} else {
 				if (value != null && !value.getClass().isPrimitive() && !Modifier.isFinal(value.getClass().getModifiers())) {
@@ -107,13 +107,13 @@ public class BeanImpl extends AbstractBean<Object> implements ChangeListener {
 	}
 
 	@Override
-	public boolean isChanged() {
+	public boolean changed() {
 		if (changes.size() > 0) {
 			return true;
 		} else {
 			boolean changed = false;
 			for (Map.Entry<String, Bean> entry : complexes.entrySet()) {
-				changed = changed || entry.getValue().isChanged();
+				changed = changed || entry.getValue().changed();
 			}
 			return changed;
 		}
