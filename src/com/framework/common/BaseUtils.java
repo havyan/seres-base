@@ -242,7 +242,7 @@ public class BaseUtils {
 		try {
 			PropertyUtils.setProperty(bean, convertPropertyName(propertyName), value);
 		} catch (Exception e) {
-			Logger.error(e);
+			Logger.error("Error found when setting property, but it could be ignored: " + e.getMessage());
 		}
 	}
 
